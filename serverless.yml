@@ -1,0 +1,90 @@
+service: xii-simposio-infra
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  runtime: go1.x
+  region: sa-east-1
+  cfLogs: true
+  iamRoleStatements:
+    -
+      Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+      Resource:
+        Fn::GetAtt:
+          - SubscribersTable
+          - Arn
+    -
+      Effect: Allow
+      Action:
+        - ses:sendEmail
+      Resource: '*'
+
+# Define custom variables
+custom:
+  EDICION: 'xii'
+  TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscribers
+  EMAIL: carlos.a.frias@gmail.com
+  # validatorRoleName: simposio-roles-validator
+  # mailerRoleName: simposio-roles-mailer
+
+package:
+ exclude:
+   - ./**
+ include:
+   - ./bin/**
+
+functions:
+  validator:
+    handler: bin/validator
+    timeout: 30
+    environment:
+      TABLE_NAME: ${self:custom.TABLE_NAME}
+    events:
+      - http:
+          path: /
+          method: post
+          cors: true
+
+  mailer:
+    handler: bin/mailer
+    timeout: 120
+    environment:
+      EMAIL: ${self:custom.EMAIL}
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - SubscribersTable
+              - StreamArn
+          batchSize: 1
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    SubscribersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: documento
+            AttributeType: 'N'
+        KeySchema:
+          - AttributeName: documento
+            KeyType: HASH
+          - AttributeName: apellido
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
