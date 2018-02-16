@@ -1,4 +1,4 @@
-# XII SImposio de Contabilidad del Extremo Sur
+# XII Simposio de Contabilidad del Extremo Sur
 > Infrastructure
 
 This repo contains lambda functions and CloudFormation template to deploy backend for the app required by event *XII Simposio de Contabilidad del Extremo Sur*.
