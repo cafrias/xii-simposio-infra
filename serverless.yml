@@ -1,5 +1,8 @@
 service: xii-simposio-infra
 
+plugins:
+  - serverless-dynamodb-local
+
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -33,6 +36,11 @@ custom:
   EDICION: 'xii'
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscribers
   EMAIL: carlos.a.frias@gmail.com
+  dynamodb:
+    start:
+      inMemory: true
+      migrate: true
+      seed: false
   # validatorRoleName: simposio-roles-validator
   # mailerRoleName: simposio-roles-mailer
 
