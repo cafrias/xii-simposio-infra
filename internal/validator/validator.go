@@ -1,5 +1,7 @@
 package validator
 
+import "github.com/friasdesign/xii-simposio-infra/internal/dynamodb"
+
 // Subscripcion represents a single subscription to the event.
 type Subscripcion struct {
 	Documento           int     `json:"documento"`
@@ -22,6 +24,12 @@ type Subscripcion struct {
 	PonenciaCoautores   string  `json:"ponencia_coautores,omitempty"`
 	PonenciaInstitucion string  `json:"ponencia_institucion,omitempty"`
 	Acompanantes        int     `json:"acompanantes"`
+}
+
+// Client creates a connection to the services.
+type Client interface {
+	dynamodb.DynamoDB
+	SubscripcionService() SubscripcionService
 }
 
 // SubscripcionService represents a service for managing Subscripcion.

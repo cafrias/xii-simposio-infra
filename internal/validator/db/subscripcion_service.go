@@ -10,15 +10,18 @@ import (
 	"github.com/friasdesign/xii-simposio-infra/internal/validator"
 )
 
+// Ensure DialService implements wtf.DialService.
+var _ validator.SubscripcionService = &SubscripcionService{}
+
 // SubscripcionService contains CRUD methods for Subscription type.
 type SubscripcionService struct {
-	DB *dynamodb.DynamoDB
+	client *Client
 }
 
 // Subscripcion fetches a Subscripcion by Documento.
-func (s *SubscripcionService) Subscripcion(doc int) *validator.Subscripcion {
-	result, err := s.DB.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(os.Getenv("TABLE_NAME")),
+func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, error) {
+	result, err := s.client.db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(os.Getenv(s.client.TableName)),
 		Key: map[string]*dynamodb.AttributeValue{
 			"documento": {
 				N: aws.String(string(doc)),
@@ -26,8 +29,7 @@ func (s *SubscripcionService) Subscripcion(doc int) *validator.Subscripcion {
 		},
 	})
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil
+		return nil, err
 	}
 
 	item := validator.Subscripcion{}
@@ -36,7 +38,7 @@ func (s *SubscripcionService) Subscripcion(doc int) *validator.Subscripcion {
 		panic(fmt.Sprintf("Failed to unmarshal Record, %v", err))
 	}
 
-	return &item
+	return &item, nil
 }
 
 // CreateSubscripcion creates a new Subscripcion.
@@ -48,9 +50,9 @@ func (s *SubscripcionService) CreateSubscripcion(subs validator.Subscripcion) er
 
 	input := &dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String(os.Getenv("TABLE_NAME")),
+		TableName: aws.String(s.client.TableName),
 	}
-	_, err = s.DB.PutItem(input)
+	_, err = s.client.db.PutItem(input)
 	if err != nil {
 		return err
 	}
