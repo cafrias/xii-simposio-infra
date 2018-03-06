@@ -23,3 +23,9 @@ type Subscripcion struct {
 	PonenciaInstitucion string  `json:"ponencia_institucion,omitempty"`
 	Acompanantes        int     `json:"acompanantes"`
 }
+
+// SubscripcionService represents a service for managing Subscripcion.
+type SubscripcionService interface {
+	Subscripcion(doc int) (*Subscripcion, error)
+	CreateSubscripcion(subs Subscripcion) error
+}
