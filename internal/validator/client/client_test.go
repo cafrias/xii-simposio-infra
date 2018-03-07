@@ -69,7 +69,13 @@ func MustOpenClient() *Client {
 
 // Close closes the client and removes the underlying database.
 func (c *Client) Close() error {
-	// TODO: Should close connection and remove database.
+	database := c.Client.DB()
+	_, err := database.DeleteTable(&dynamodb.DeleteTableInput{
+		TableName: aws.String(c.TableName),
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
-	// return c.Client.Close()
 }

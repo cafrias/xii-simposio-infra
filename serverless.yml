@@ -39,7 +39,7 @@ custom:
   dynamodb:
     start:
       inMemory: true
-      migrate: true
+      migrate: false
       seed: false
   # validatorRoleName: simposio-roles-validator
   # mailerRoleName: simposio-roles-mailer
