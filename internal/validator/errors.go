@@ -2,9 +2,8 @@ package validator
 
 // Subscripcion errors.
 const (
-	ErrSubscripcionNotFound   = Error("Subscripcion not found")
-	ErrSubscripcionExists     = Error("Subscripcion already exists")
-	ErrSubscripcionIDRequired = Error("Documento required")
+	ErrSubscripcionNotFound = Error("Subscripcion not found")
+	ErrSubscripcionExists   = Error("Subscripcion already exists")
 )
 
 // Error represents a validator error.

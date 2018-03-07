@@ -59,3 +59,15 @@ func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionExists(t *testing
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionExists'")
 	}
 }
+
+// Ensure duplicate dials are not allowed.
+func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionNotFound(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	if _, err := s.Subscripcion(1234); err != validator.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}

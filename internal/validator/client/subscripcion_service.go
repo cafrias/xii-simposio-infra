@@ -33,6 +33,9 @@ func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, er
 	if err != nil {
 		return nil, err
 	}
+	if len(result.Item) == 0 {
+		return nil, validator.ErrSubscripcionNotFound
+	}
 
 	item := validator.Subscripcion{}
 	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
