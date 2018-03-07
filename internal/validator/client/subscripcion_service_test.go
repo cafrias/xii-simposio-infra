@@ -7,12 +7,10 @@ import (
 	"github.com/friasdesign/xii-simposio-infra/internal/validator"
 )
 
-func TestSubscripcionService_CreateSubscripcion(t *testing.T) {
-	c := MustOpenClient()
-	defer c.Close()
-	s := c.SubscripcionService()
+var subs validator.Subscripcion
 
-	subs := validator.Subscripcion{
+func setUp() {
+	subs = validator.Subscripcion{
 		Documento:        1234,
 		Apellido:         "Frias",
 		Nombre:           "Carlos",
@@ -25,6 +23,13 @@ func TestSubscripcionService_CreateSubscripcion(t *testing.T) {
 		ArancelPago:      1245.1234,
 		Acompanantes:     0,
 	}
+}
+
+func TestSubscripcionService_CreateSubscripcion(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
 
 	// Create new Subscripcion.
 	if err := s.CreateSubscripcion(&subs); err != nil {
@@ -37,5 +42,20 @@ func TestSubscripcionService_CreateSubscripcion(t *testing.T) {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(&subs, other) {
 		t.Fatalf("unexpected Subscripcion: %#v", other)
+	}
+}
+
+// Ensure duplicate dials are not allowed.
+func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionExists(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CreateSubscripcion(&subs); err != validator.ErrSubscripcionExists {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionExists'")
 	}
 }

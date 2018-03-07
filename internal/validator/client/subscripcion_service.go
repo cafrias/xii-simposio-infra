@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/aws/aws-sdk-go/aws/awserr"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -49,11 +51,15 @@ func (s *SubscripcionService) CreateSubscripcion(subs *validator.Subscripcion) e
 	}
 
 	input := &dynamodb.PutItemInput{
-		Item:      av,
-		TableName: aws.String(s.client.TableName),
+		ConditionExpression: aws.String("attribute_not_exists(documento)"),
+		Item:                av,
+		TableName:           aws.String(s.client.TableName),
 	}
 	_, err = s.client.db.PutItem(input)
 	if err != nil {
+		if _, ok := err.(awserr.RequestFailure); ok {
+			return validator.ErrSubscripcionExists
+		}
 		return err
 	}
 
