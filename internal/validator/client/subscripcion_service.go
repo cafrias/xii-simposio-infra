@@ -1,8 +1,8 @@
-package db
+package client
 
 import (
 	"fmt"
-	"os"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -21,10 +21,10 @@ type SubscripcionService struct {
 // Subscripcion fetches a Subscripcion by Documento.
 func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, error) {
 	result, err := s.client.db.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(os.Getenv(s.client.TableName)),
+		TableName: aws.String(s.client.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"documento": {
-				N: aws.String(string(doc)),
+				N: aws.String(strconv.Itoa(doc)),
 			},
 		},
 	})
@@ -42,7 +42,7 @@ func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, er
 }
 
 // CreateSubscripcion creates a new Subscripcion.
-func (s *SubscripcionService) CreateSubscripcion(subs validator.Subscripcion) error {
+func (s *SubscripcionService) CreateSubscripcion(subs *validator.Subscripcion) error {
 	av, err := dynamodbattribute.MarshalMap(subs)
 	if err != nil {
 		return err

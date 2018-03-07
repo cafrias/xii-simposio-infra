@@ -1,4 +1,4 @@
-package db
+package client
 
 import (
 	"os"
@@ -14,6 +14,7 @@ import (
 // Client represents a client to the underlying DynamoDB data store.
 type Client struct {
 	Region              string
+	Endpoint            string
 	TableName           string
 	Now                 func() time.Time
 	subscripcionService SubscripcionService
@@ -24,6 +25,7 @@ type Client struct {
 func NewClient() *Client {
 	c := &Client{
 		Region:    "sa-east-1",
+		Endpoint:  "dynamodb.sa-east-1.amazonaws.com",
 		TableName: os.Getenv("TABLE_NAME"),
 		Now:       time.Now,
 	}
@@ -33,10 +35,14 @@ func NewClient() *Client {
 
 // Open opens and initializes the DynamoDB connection.
 func (c *Client) Open() error {
-	// AWS session
-	sess, err := session.NewSession(&aws.Config{
+	// AWS Config
+	conf := &aws.Config{
 		Region: aws.String(c.Region),
-	})
+	}
+	conf.WithEndpoint(c.Endpoint)
+
+	// AWS session
+	sess, err := session.NewSession(conf)
 	if err != nil {
 		return err
 	}
@@ -45,6 +51,9 @@ func (c *Client) Open() error {
 
 	return nil
 }
+
+// DB returns the db connection
+func (c *Client) DB() *dynamodb.DynamoDB { return c.db }
 
 // SubscripcionService returns the Subscripcion service associated with the client.
 func (c *Client) SubscripcionService() validator.SubscripcionService { return &c.subscripcionService }

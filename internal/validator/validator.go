@@ -35,5 +35,5 @@ type Client interface {
 // SubscripcionService represents a service for managing Subscripcion.
 type SubscripcionService interface {
 	Subscripcion(doc int) (*Subscripcion, error)
-	CreateSubscripcion(subs Subscripcion) error
+	CreateSubscripcion(subs *Subscripcion) error
 }
