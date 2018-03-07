@@ -4,8 +4,8 @@ import (
 	"strconv"
 )
 
-// Documento validates whether string i represents valid Documento.
-func Documento(i string) bool {
+// IsInt validates whether string i represents valid Documento.
+func IsInt(i string) bool {
 	// Convert to int
 	_, err := strconv.Atoi(i)
 	if err != nil {

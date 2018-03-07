@@ -7,34 +7,34 @@ import (
 	"github.com/friasdesign/xii-simposio-infra/internal/validator/validators"
 )
 
-func TestDocumento_ValidatesCorrectly(t *testing.T) {
+func TestExists_ValidatesCorrectly(t *testing.T) {
 	fix := []test.Case{
 		test.Case{
-			Input:    "1234",
+			Input:    "asd",
 			Expected: true,
 		},
 		test.Case{
-			Input:    "pepe",
-			Expected: false,
-		},
-		test.Case{
-			Input:    "1234asd",
-			Expected: false,
-		},
-		test.Case{
-			Input:    "0",
+			Input:    123,
 			Expected: true,
+		},
+		test.Case{
+			Input:    "",
+			Expected: false,
+		},
+		test.Case{
+			Input:    nil,
+			Expected: false,
+		},
+		test.Case{
+			Input: " 	",
+			Expected: false,
 		},
 	}
 
 	for _, val := range fix {
-		s, ok := val.Input.(string)
-		if ok == false {
-			t.Fatal("Invalid type for Test Case", val.Input)
-		}
-		o := validators.Documento(s)
+		o := validators.Exists(val.Input)
 		if o != val.Expected {
-			t.Fatal("Wrong validation!", s)
+			t.Fatal("Wrong validation!", val.Input)
 		}
 	}
 }

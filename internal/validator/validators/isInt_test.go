@@ -7,27 +7,23 @@ import (
 	"github.com/friasdesign/xii-simposio-infra/internal/validator/validators"
 )
 
-func TestEmail_ValidatesCorrectly(t *testing.T) {
+func TestIsInt_ValidatesCorrectly(t *testing.T) {
 	fix := []test.Case{
 		test.Case{
-			Input:    "pepe_pepe@pepe.com",
+			Input:    "1234",
 			Expected: true,
 		},
 		test.Case{
-			Input:    "pepe_@pepe.com",
+			Input:    "pepe",
+			Expected: false,
+		},
+		test.Case{
+			Input:    "1234asd",
+			Expected: false,
+		},
+		test.Case{
+			Input:    "0",
 			Expected: true,
-		},
-		test.Case{
-			Input:    "",
-			Expected: false,
-		},
-		test.Case{
-			Input:    "asd",
-			Expected: false,
-		},
-		test.Case{
-			Input:    "mario\\marielo@pepe.com",
-			Expected: false,
 		},
 	}
 
@@ -36,7 +32,7 @@ func TestEmail_ValidatesCorrectly(t *testing.T) {
 		if ok == false {
 			t.Fatal("Invalid type for Test Case", val.Input)
 		}
-		o := validators.Email(s)
+		o := validators.IsInt(s)
 		if o != val.Expected {
 			t.Fatal("Wrong validation!", s)
 		}
