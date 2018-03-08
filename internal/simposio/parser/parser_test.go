@@ -5,12 +5,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/friasdesign/xii-simposio-infra/internal/validator"
-	"github.com/friasdesign/xii-simposio-infra/internal/validator/parser"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/parser"
 )
 
 func TestParse_ReturnsSubscripcionIfOK(t *testing.T) {
-	subs := validator.Subscripcion{
+	subs := simposio.Subscripcion{
 		Documento:        1234,
 		Apellido:         "Frias",
 		Nombre:           "Carlos",
@@ -40,7 +40,7 @@ func TestParse_ReturnsSubscripcionIfOK(t *testing.T) {
 }
 
 func TestParse_ReturnsSubscripcionIfEmpty(t *testing.T) {
-	subs := validator.Subscripcion{}
+	subs := simposio.Subscripcion{}
 
 	in, err := json.Marshal(subs)
 	if err != nil {

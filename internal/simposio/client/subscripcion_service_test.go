@@ -4,13 +4,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/friasdesign/xii-simposio-infra/internal/validator"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 )
 
-var subs validator.Subscripcion
+var subs simposio.Subscripcion
 
 func setUp() {
-	subs = validator.Subscripcion{
+	subs = simposio.Subscripcion{
 		Documento:        1234,
 		Apellido:         "Frias",
 		Nombre:           "Carlos",
@@ -55,7 +55,7 @@ func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionExists(t *testing
 	if err := s.CreateSubscripcion(&subs); err != nil {
 		t.Fatal(err)
 	}
-	if err := s.CreateSubscripcion(&subs); err != validator.ErrSubscripcionExists {
+	if err := s.CreateSubscripcion(&subs); err != simposio.ErrSubscripcionExists {
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionExists'")
 	}
 }
@@ -67,7 +67,7 @@ func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionNotFound(t *testi
 	defer c.Close()
 	s := c.SubscripcionService()
 
-	if _, err := s.Subscripcion(1234); err != validator.ErrSubscripcionNotFound {
+	if _, err := s.Subscripcion(1234); err != simposio.ErrSubscripcionNotFound {
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
 	}
 }

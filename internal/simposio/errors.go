@@ -1,4 +1,4 @@
-package validator
+package simposio
 
 // Subscripcion errors.
 const (

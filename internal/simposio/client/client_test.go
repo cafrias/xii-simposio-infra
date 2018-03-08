@@ -5,7 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/friasdesign/xii-simposio-infra/internal/validator/client"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
 )
 
 // Now is the mocked current time for testing.

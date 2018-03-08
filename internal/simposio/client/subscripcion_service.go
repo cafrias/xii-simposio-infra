@@ -9,11 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"github.com/friasdesign/xii-simposio-infra/internal/validator"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 )
 
 // Ensure DialService implements wtf.DialService.
-var _ validator.SubscripcionService = &SubscripcionService{}
+var _ simposio.SubscripcionService = &SubscripcionService{}
 
 // SubscripcionService contains CRUD methods for Subscription type.
 type SubscripcionService struct {
@@ -21,7 +21,7 @@ type SubscripcionService struct {
 }
 
 // Subscripcion fetches a Subscripcion by Documento.
-func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, error) {
+func (s *SubscripcionService) Subscripcion(doc int) (*simposio.Subscripcion, error) {
 	result, err := s.client.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(s.client.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -34,10 +34,10 @@ func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, er
 		return nil, err
 	}
 	if len(result.Item) == 0 {
-		return nil, validator.ErrSubscripcionNotFound
+		return nil, simposio.ErrSubscripcionNotFound
 	}
 
-	item := validator.Subscripcion{}
+	item := simposio.Subscripcion{}
 	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to unmarshal Record, %v", err))
@@ -47,7 +47,7 @@ func (s *SubscripcionService) Subscripcion(doc int) (*validator.Subscripcion, er
 }
 
 // CreateSubscripcion creates a new Subscripcion.
-func (s *SubscripcionService) CreateSubscripcion(subs *validator.Subscripcion) error {
+func (s *SubscripcionService) CreateSubscripcion(subs *simposio.Subscripcion) error {
 	av, err := dynamodbattribute.MarshalMap(subs)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (s *SubscripcionService) CreateSubscripcion(subs *validator.Subscripcion) e
 	_, err = s.client.db.PutItem(input)
 	if err != nil {
 		if _, ok := err.(awserr.RequestFailure); ok {
-			return validator.ErrSubscripcionExists
+			return simposio.ErrSubscripcionExists
 		}
 		return err
 	}

@@ -4,11 +4,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/friasdesign/xii-simposio-infra/internal/validator"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 )
 
 // Client represents a client to the underlying DynamoDB data store.
@@ -56,4 +55,4 @@ func (c *Client) Open() error {
 func (c *Client) DB() *dynamodb.DynamoDB { return c.db }
 
 // SubscripcionService returns the Subscripcion service associated with the client.
-func (c *Client) SubscripcionService() validator.SubscripcionService { return &c.subscripcionService }
+func (c *Client) SubscripcionService() simposio.SubscripcionService { return &c.subscripcionService }
