@@ -3,8 +3,8 @@ package validators_test
 import (
 	"testing"
 
-	"github.com/friasdesign/xii-simposio-infra/internal/test"
-	"github.com/friasdesign/xii-simposio-infra/internal/validator/validators"
+	"github.com/friasdesign/xii-simposio-infra/pkg/test"
+	"github.com/friasdesign/xii-simposio-infra/pkg/validator/validators"
 )
 
 func TestIsEmail_ValidatesCorrectly(t *testing.T) {

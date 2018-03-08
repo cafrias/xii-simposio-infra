@@ -4,4 +4,5 @@ package test
 type Case struct {
 	Input    interface{}
 	Expected interface{}
+	Error    error
 }
