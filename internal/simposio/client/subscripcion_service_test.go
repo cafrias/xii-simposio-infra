@@ -19,8 +19,8 @@ func setUp() {
 		Zip:              9420,
 		Localidad:        "Rio Grande",
 		Pais:             "Argentina",
-		ArancelCategoria: 1,
-		ArancelPago:      1245.1234,
+		ArancelCategoria: "general",
+		ArancelPago:      "Con cheque",
 		Acompanantes:     0,
 	}
 }

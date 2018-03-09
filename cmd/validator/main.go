@@ -9,6 +9,7 @@ import (
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/validators"
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/parser"
 
@@ -57,7 +58,7 @@ type body struct {
 
 func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, body, error) {
 	b := req.Body
-	validate := validator.New()
+	validate := validators.Initialize()
 
 	// Parse body
 	subs, err := parser.Parse(b)

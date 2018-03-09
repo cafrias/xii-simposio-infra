@@ -34,7 +34,7 @@ provider:
 # Define custom variables
 custom:
   EDICION: 'xii'
-  TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscribers
+  TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
   dynamodb:
     start:

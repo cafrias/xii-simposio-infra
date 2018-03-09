@@ -10,7 +10,7 @@
         "zip": 9420,
         "localidad": "Rio Grande, Tierra del Fuego",
         "pais": "Argentina",
-        "arancel_categoria": 1,
+        "arancel_categoria": "general",
         "arancel_adicional": 111.0,
         "arancel_pago": "Recibo Nro 122245",
         "ponencia_presenta": true,

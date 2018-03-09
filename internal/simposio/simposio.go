@@ -2,6 +2,15 @@ package simposio
 
 import "github.com/friasdesign/xii-simposio-infra/internal/dynamodb"
 
+// Aranceles contains a map with the values of each arancel.
+var Aranceles = map[string]float64{
+	"estudiante_untdf":   0,
+	"estudiante_otro":    350,
+	"docente_untdf":      1600,
+	"matriculado_cpcetf": 1000,
+	"general":            2700,
+}
+
 // Subscripcion represents a single subscription to the event.
 type Subscripcion struct {
 	Documento           int     `json:"documento" validate:"required"`
@@ -16,7 +25,7 @@ type Subscripcion struct {
 	Localidad           string  `json:"localidad" validate:"required"`
 	Pais                string  `json:"pais" validate:"required"`
 	ArancelAdicional    float64 `json:"arancel_adicional,omitempty" validate:"gte=0"`
-	ArancelCategoria    int     `json:"arancel_categoria" validate:"required"`
+	ArancelCategoria    string  `json:"arancel_categoria" validate:"required,arancel"`
 	ArancelPago         string  `json:"arancel_pago" validate:"required,gte=0"`
 	PonenciaPresenta    bool    `json:"ponencia_presenta" validate:"required"`
 	PonenciaTitulo      string  `json:"ponencia_titulo,omitempty"`
@@ -24,6 +33,16 @@ type Subscripcion struct {
 	PonenciaCoautores   string  `json:"ponencia_coautores,omitempty"`
 	PonenciaInstitucion string  `json:"ponencia_institucion,omitempty"`
 	Acompanantes        int     `json:"acompanantes" validate:"required,gte=0"`
+}
+
+// GetArancelBase returns the base values for arancel.
+func (s *Subscripcion) GetArancelBase() float64 {
+	return Aranceles[s.ArancelCategoria]
+}
+
+// GetArancelTotal returns the total value for the arancel.
+func (s *Subscripcion) GetArancelTotal() float64 {
+	return s.GetArancelBase() + s.ArancelAdicional
 }
 
 // Client creates a connection to the services.
