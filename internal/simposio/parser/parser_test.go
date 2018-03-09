@@ -20,7 +20,7 @@ func TestParse_ReturnsSubscripcionIfOK(t *testing.T) {
 		Localidad:        "Rio Grande",
 		Pais:             "Argentina",
 		ArancelCategoria: 1,
-		ArancelPago:      1245.1234,
+		ArancelPago:      "Pago con cheque amigo!",
 		Acompanantes:     0,
 	}
 

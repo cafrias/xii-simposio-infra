@@ -17,7 +17,7 @@ type Subscripcion struct {
 	Pais                string  `json:"pais" validate:"required"`
 	ArancelAdicional    float64 `json:"arancel_adicional,omitempty" validate:"gte=0"`
 	ArancelCategoria    int     `json:"arancel_categoria" validate:"required"`
-	ArancelPago         float64 `json:"arancel_pago" validate:"required,gte=0"`
+	ArancelPago         string  `json:"arancel_pago" validate:"required,gte=0"`
 	PonenciaPresenta    bool    `json:"ponencia_presenta" validate:"required"`
 	PonenciaTitulo      string  `json:"ponencia_titulo,omitempty"`
 	PonenciaArea        string  `json:"ponencia_area,omitempty"`

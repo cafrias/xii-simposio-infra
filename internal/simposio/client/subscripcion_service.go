@@ -66,6 +66,5 @@ func (s *SubscripcionService) CreateSubscripcion(subs *simposio.Subscripcion) er
 		return err
 	}
 
-	fmt.Printf("Successfully added 'Subscripcion', id: %v\n", subs.Documento)
 	return nil
 }
