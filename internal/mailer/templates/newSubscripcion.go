@@ -1,7 +1,28 @@
 package templates
 
+import (
+	"bytes"
+	"html/template"
+)
+
+// ParseNewSubscripcion parses NewSubscripcion template
+func ParseNewSubscripcion(data map[string]string) (string, error) {
+	t, err := template.New("subs").Parse(newSubscripcion)
+	if err != nil {
+		return "", err
+	}
+	tb := bytes.NewBufferString("")
+
+	err = t.Execute(tb, data)
+	if err != nil {
+		return "", err
+	}
+
+	return tb.String(), nil
+}
+
 // NewSubscripcion email template for new Subscripcion event.
-const NewSubscripcion = `
+const newSubscripcion = `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
         <head>

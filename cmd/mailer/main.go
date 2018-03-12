@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"html/template"
 	"strconv"
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
@@ -47,14 +45,12 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		smap["Arancel Base"] = strconv.FormatFloat(base, 'f', -1, 64)
 		smap["Total"] = strconv.FormatFloat(base+adicional, 'f', -1, 64)
 
-		t, err := template.New("subs").Parse(templates.NewSubscripcion)
+		// Parse Template
+		tStr, err := templates.ParseNewSubscripcion(smap)
 		if err != nil {
 			fmt.Println("Error while parsing template")
 			return
 		}
-		tb := bytes.NewBufferString("")
-
-		err = t.Execute(tb, smap)
 
 		// Initialize ses
 		sess, err := session.NewSession(&aws.Config{
@@ -66,6 +62,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 
 		svc := ses.New(sess)
 
+		// Send email
 		input := &ses.SendEmailInput{
 			Destination: &ses.Destination{
 				CcAddresses: []*string{},
@@ -77,7 +74,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 				Body: &ses.Body{
 					Html: &ses.Content{
 						Charset: aws.String("UTF-8"),
-						Data:    aws.String(tb.String()),
+						Data:    aws.String(tStr),
 					},
 				},
 				Subject: &ses.Content{
