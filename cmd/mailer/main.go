@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 
+	"github.com/friasdesign/xii-simposio-infra/internal/mailer/parser"
 	"github.com/friasdesign/xii-simposio-infra/internal/mailer/templates"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -30,24 +31,14 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 
 		for key, value := range record.Change.NewImage {
 			var valStr string
-			switch value.DataType() {
-			case events.DataTypeBoolean:
-				if value.Boolean() {
-					valStr = "Si"
-				} else {
-					valStr = "No"
-				}
-			case events.DataTypeNumber:
-				if key == "arancel_adicional" {
-					f, _ := value.Float()
-					valStr = strconv.FormatFloat(f, 'f', -1, 64)
-				} else {
-					f, _ := value.Integer()
-					valStr = strconv.Itoa(int(f))
-				}
-			case events.DataTypeString:
-				valStr = value.String()
+
+			// Parse DynamoDBAttribute to string
+			valStr, err := parser.DDBAttributeValueToString(key, value)
+			if err != nil {
+				fmt.Print("Error while parsing DDBAttributeValue to String", err)
 			}
+
+			// Humanize label
 			var label string
 			switch key {
 			case "acompanantes":
