@@ -36,6 +36,7 @@ custom:
   EDICION: 'xii'
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
+  USER_POOL: ${self:custom.EDICION}-simposio-admins
   dynamodb:
     start:
       inMemory: true
@@ -64,7 +65,7 @@ functions:
 
   mailer:
     handler: bin/mailer
-    timeout: 120
+    timeout: 60
     environment:
       EMAIL: ${self:custom.EMAIL}
     events:
@@ -75,6 +76,12 @@ functions:
               - SubscribersTable
               - StreamArn
           batchSize: 1
+  
+  graphql:
+    handler: bin/graphql
+    timeout: 30
+    environment:
+      USER_POOL: ${self:custom.USER_POOL}
 
 # you can add CloudFormation resource templates here
 resources:

@@ -1,0 +1,12 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Creates a Cognito User Pool.'
+Resources:
+  AdminUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: true
+          UnusedAccountValidityDays: 180
+        EmailVerificationSubject: 'Verificación de Email | XII Simposio de Contabilidad'
+        MfaConfiguration: 'OFF'
+        UserPoolName: xii-simposio-admins
