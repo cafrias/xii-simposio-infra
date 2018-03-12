@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"html/template"
 	"strconv"
-	"strings"
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 
@@ -30,8 +29,6 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		smap := make(map[string]string)
 
 		for key, value := range record.Change.NewImage {
-			var valStr string
-
 			// Parse DynamoDBAttribute to string
 			valStr, err := parser.DDBAttributeValueToString(key, value)
 			if err != nil {
@@ -39,13 +36,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 			}
 
 			// Humanize label
-			var label string
-			switch key {
-			case "acompanantes":
-				label = "Acompañantes"
-			default:
-				label = strings.Title(strings.Replace(key, "_", " ", -1))
-			}
+			label := parser.HumanizeLabel(key)
 
 			smap[label] = valStr
 		}
