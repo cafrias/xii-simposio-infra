@@ -7,10 +7,7 @@ import (
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ses"
-
+	"github.com/friasdesign/xii-simposio-infra/internal/mailer/mailClient"
 	"github.com/friasdesign/xii-simposio-infra/internal/mailer/parser"
 	"github.com/friasdesign/xii-simposio-infra/internal/mailer/templates"
 
@@ -53,44 +50,20 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		}
 
 		// Initialize ses
-		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String("us-east-1"),
-		})
+		mailCli, err := mailClient.New()
 		if err != nil {
-			fmt.Println("Error while setting up AWS session.")
+			fmt.Println("Error while creating a new email client.", err)
+			return
 		}
-
-		svc := ses.New(sess)
 
 		// Send email
-		input := &ses.SendEmailInput{
-			Destination: &ses.Destination{
-				CcAddresses: []*string{},
-				ToAddresses: []*string{
-					aws.String("carlos.a.frias@gmail.com"),
-				},
-			},
-			Message: &ses.Message{
-				Body: &ses.Body{
-					Html: &ses.Content{
-						Charset: aws.String("UTF-8"),
-						Data:    aws.String(tStr),
-					},
-				},
-				Subject: &ses.Content{
-					Charset: aws.String("UTF-8"),
-					Data:    aws.String("Nueva Subscripcion XII Simposio"),
-				},
-			},
-			Source: aws.String("carlos.a.frias@gmail.com"),
-		}
-
-		result, err := svc.SendEmail(input)
+		err = mailCli.Send(tStr)
 		if err != nil {
-			fmt.Println("Error while sending email!")
+			fmt.Println("Error while sending email.")
+			return
 		}
 
-		fmt.Println("Successfully sent!", result)
+		fmt.Println("Successfully sent!")
 	}
 }
 
