@@ -22,6 +22,10 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	})
 
 	return events.APIGatewayProxyResponse{
+		Headers: map[string]string{
+			"Access-Control-Allow-Origin":      "*",
+			"Access-Control-Allow-Credentials": "true",
+		},
 		StatusCode: 200,
 		Body:       string(bStr),
 	}, nil
