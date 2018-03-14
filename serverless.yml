@@ -36,7 +36,7 @@ custom:
   EDICION: 'xii'
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
-  USER_POOL: ${self:custom.EDICION}-simposio-admins
+  USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
   dynamodb:
     start:
       inMemory: true
@@ -80,8 +80,13 @@ functions:
   graphql:
     handler: bin/graphql
     timeout: 30
-    environment:
-      USER_POOL: ${self:custom.USER_POOL}
+    events:
+      - http:
+          path: /graphql
+          method: post
+          cors: true
+          authorizer:
+            arn: ${self:custom.USER_POOL_ARN}
 
 # you can add CloudFormation resource templates here
 resources:
