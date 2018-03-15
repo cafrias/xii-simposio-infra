@@ -6,7 +6,19 @@
   "author": "friasdesign <carlos.a.frias@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "serverless-dynamodb-local": "^0.2.27"
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "eslint": "^4.18.2",
+    "eslint-plugin-flowtype": "^2.46.1",
+    "flow-bin": "^0.67.1",
+    "serverless-dynamodb-local": "^0.2.27",
+    "serverless-webpack": "^5.1.0",
+    "webpack": "^4.1.1",
+    "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
     "serverless-domain-manager": "^2.3.5"

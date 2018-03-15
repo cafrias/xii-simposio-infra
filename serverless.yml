@@ -3,6 +3,7 @@ service: xii-simposio-infra
 plugins:
   - serverless-dynamodb-local
   - serverless-domain-manager
+  - serverless-webpack
 
 provider:
   name: aws
@@ -38,6 +39,9 @@ custom:
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
   USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
+  CORS_ORIGINS: "'*'"
+  CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+  CORS_METHODS: "'GET,POST,OPTIONS'"
   customDomain:
     domainName: simposio.cfrias.com.ar
     basePath: api
@@ -49,6 +53,11 @@ custom:
       inMemory: true
       migrate: false
       seed: false
+  webpack:
+    webpackConfig: 'webpack.config.js'
+    includeModules: true
+    packager: yarn
+    packExternalModulesMaxBuffer: 200 * 1024
   # validatorRoleName: simposio-roles-validator
   # mailerRoleName: simposio-roles-mailer
 
@@ -57,6 +66,7 @@ package:
    - ./**
  include:
    - ./bin/**
+   - ./js/**
 
 functions:
   validator:
@@ -85,7 +95,8 @@ functions:
           batchSize: 1
   
   graphql:
-    handler: bin/graphql
+    runtime: nodejs6.10
+    handler: js/graphql-backend/handler.handler
     timeout: 30
     events:
       - http:
@@ -113,3 +124,23 @@ resources:
           WriteCapacityUnits: 1
         StreamSpecification:
           StreamViewType: NEW_IMAGE
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.CORS_ORIGINS}
+          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.CORS_HEADERS}
+          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.CORS_METHODS}
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.CORS_ORIGINS}
+          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.CORS_HEADERS}
+          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.CORS_METHODS}
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
