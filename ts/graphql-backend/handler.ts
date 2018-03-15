@@ -1,5 +1,3 @@
-// @flow
-
 function matraca(): string {
         return "heea!"
 }

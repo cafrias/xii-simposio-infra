@@ -72,20 +72,20 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./js/graphql-backend/handler.js");
+/******/ 	return __webpack_require__(__webpack_require__.s = "./ts/graphql-backend/handler.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ "./js/graphql-backend/handler.js":
+/***/ "./ts/graphql-backend/handler.ts":
 /*!***************************************!*\
-  !*** ./js/graphql-backend/handler.js ***!
+  !*** ./ts/graphql-backend/handler.ts ***!
   \***************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\n\nObject.defineProperty(exports, \"__esModule\", {\n        value: true\n});\nexports.handler = handler;\nfunction matraca() {\n        return \"heea!\";\n}\n\nfunction handler() {\n        console.log(matraca());\n}\n\n//# sourceURL=webpack:///./js/graphql-backend/handler.js?");
+eval("\nexports.__esModule = true;\nfunction matraca() {\n    return \"heea!\";\n}\nfunction handler() {\n    console.log(matraca());\n}\nexports.handler = handler;\n\n\n//# sourceURL=webpack:///./ts/graphql-backend/handler.ts?");
 
 /***/ })
 
