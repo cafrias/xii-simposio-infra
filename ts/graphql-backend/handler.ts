@@ -4,4 +4,5 @@ function matraca(): string {
 
 export function handler() {
         console.log(matraca())
+
 }
