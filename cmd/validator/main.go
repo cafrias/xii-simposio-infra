@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambdacontext"
 
+	"github.com/friasdesign/xii-simposio-infra/internal/api"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/validators"
@@ -51,8 +52,7 @@ func (v validationError) Error() string {
 }
 
 type body struct {
-	LogID  string            `json:"log_id"`
-	Msg    string            `json:"message"`
+	api.Body
 	Errors []validationError `json:"errors,omitempty"`
 }
 
@@ -64,7 +64,7 @@ func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, body, erro
 	subs, err := parser.Parse(b)
 	if err != nil {
 		fmt.Println(ErrRequestLog, err.Error())
-		return 400, body{LogID: reqID, Msg: ErrRequestMsg}, nil
+		return 400, body{Body: api.Body{LogID: reqID, Msg: ErrRequestMsg}}, nil
 	}
 
 	// Validate Subscripcion struct
@@ -83,7 +83,7 @@ func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, body, erro
 			errors = append(errors, v)
 		}
 
-		return 400, body{LogID: reqID, Msg: ErrValidationMsg, Errors: errors}, nil
+		return 400, body{Body: api.Body{LogID: reqID, Msg: ErrValidationMsg}, Errors: errors}, nil
 	}
 
 	// Open DynamoDB connection
@@ -91,7 +91,7 @@ func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, body, erro
 	err = c.Open()
 	if err != nil {
 		fmt.Println(ErrDynamoDBConnectionLog)
-		return 500, body{LogID: reqID, Msg: ErrInternalMsg}, err
+		return 500, body{Body: api.Body{LogID: reqID, Msg: ErrInternalMsg}}, err
 	}
 
 	// Write new Subscripcion to DB.
@@ -99,15 +99,15 @@ func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, body, erro
 	if err != nil {
 		if err == simposio.ErrSubscripcionExists {
 			fmt.Printf(ErrSubscripcionExistsLog, subs.Documento)
-			return 400, body{LogID: reqID, Msg: ErrSubscripcionExistsMsg}, nil
+			return 400, body{Body: api.Body{LogID: reqID, Msg: ErrSubscripcionExistsMsg}}, nil
 		}
 		fmt.Printf(ErrSavingSubscripcionLog, subs.Documento)
-		return 500, body{LogID: reqID, Msg: ErrInternalMsg}, err
+		return 500, body{Body: api.Body{LogID: reqID, Msg: ErrInternalMsg}}, err
 	}
 
 	fmt.Printf(SucSavingSubscripcionLog, subs.Documento)
 
-	return 201, body{LogID: reqID, Msg: SucSavingSubscipcionMsg}, nil
+	return 201, body{Body: api.Body{LogID: reqID, Msg: SucSavingSubscipcionMsg}}, nil
 }
 
 // Handler is used by AWS Lambda to handle request.
@@ -129,10 +129,7 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	}
 
 	return events.APIGatewayProxyResponse{
-		Headers: map[string]string{
-			"Access-Control-Allow-Origin":      "*",
-			"Access-Control-Allow-Credentials": "true",
-		},
+		Headers:    api.DefaultHeaders(),
 		StatusCode: st,
 		Body:       string(bs),
 	}, err
