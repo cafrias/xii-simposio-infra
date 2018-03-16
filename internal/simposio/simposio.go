@@ -33,6 +33,7 @@ type Subscripcion struct {
 	PonenciaCoautores   string  `json:"ponencia_coautores,omitempty"`
 	PonenciaInstitucion string  `json:"ponencia_institucion,omitempty"`
 	Acompanantes        int     `json:"acompanantes" validate:"required,gte=0"`
+	Confirmado          bool    `json:"confirmado"`
 }
 
 // GetArancelBase returns the base values for arancel.

@@ -22,6 +22,7 @@ func setUp() {
 		ArancelCategoria: "general",
 		ArancelPago:      "Con cheque",
 		Acompanantes:     0,
+		Confirmado:       false,
 	}
 }
 
