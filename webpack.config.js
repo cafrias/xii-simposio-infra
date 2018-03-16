@@ -3,7 +3,7 @@ var nodeExternals = require('webpack-node-externals')
 var path = require('path')
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: slsw.lib.entries,
   resolve: {
     extensions: [

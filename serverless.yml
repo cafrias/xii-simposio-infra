@@ -57,7 +57,7 @@ custom:
     webpackConfig: 'webpack.config.js'
     includeModules: true
     packager: yarn
-    packExternalModulesMaxBuffer: 200 * 1024
+    # packExternalModulesMaxBuffer: 200 * 1024
   # validatorRoleName: simposio-roles-validator
   # mailerRoleName: simposio-roles-mailer
 
