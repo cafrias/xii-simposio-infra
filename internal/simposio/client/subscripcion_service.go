@@ -96,3 +96,30 @@ func (s *SubscripcionService) UpdateSubscripcion(subs *simposio.Subscripcion) er
 
 	return nil
 }
+
+// DeleteSubscripcion removes a Subscripcion.
+func (s *SubscripcionService) DeleteSubscripcion(doc int) error {
+	input := &dynamodb.DeleteItemInput{
+		ConditionExpression: aws.String("documento = :doc"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":doc": {
+				N: aws.String(strconv.Itoa(doc)),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"documento": {
+				N: aws.String(strconv.Itoa(doc)),
+			},
+		},
+		TableName: aws.String(s.client.TableName),
+	}
+	_, err := s.client.db.DeleteItem(input)
+	if err != nil {
+		if _, ok := err.(awserr.RequestFailure); ok {
+			return simposio.ErrSubscripcionNotFound
+		}
+		return err
+	}
+
+	return nil
+}

@@ -117,3 +117,37 @@ func TestSubscripcionService_UpdateSubscripcion_ErrSubscripcionNotFound(t *testi
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
 	}
 }
+
+func TestSubscripcionService_DeleteSubscripcion(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Create new Subscripcion.
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Remove Subscripcion
+	if err := s.DeleteSubscripcion(subs.Documento); err != nil {
+		t.Fatal(err)
+	}
+
+	// Try retrieve Subscripcion.
+	if _, err := s.Subscripcion(subs.Documento); err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}
+
+func TestSubscripcionService_DeleteSubscripcion_ErrSubscripcionNotFound(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Remove non existing Subscripcion
+	if err := s.DeleteSubscripcion(subs.Documento); err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}
