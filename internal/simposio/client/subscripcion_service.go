@@ -68,3 +68,31 @@ func (s *SubscripcionService) CreateSubscripcion(subs *simposio.Subscripcion) er
 
 	return nil
 }
+
+// UpdateSubscripcion updates a Subscripcion.
+func (s *SubscripcionService) UpdateSubscripcion(subs *simposio.Subscripcion) error {
+	av, err := dynamodbattribute.MarshalMap(subs)
+	if err != nil {
+		return err
+	}
+
+	input := &dynamodb.PutItemInput{
+		ConditionExpression: aws.String("documento = :doc"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":doc": {
+				N: aws.String(strconv.Itoa(subs.Documento)),
+			},
+		},
+		Item:      av,
+		TableName: aws.String(s.client.TableName),
+	}
+	_, err = s.client.db.PutItem(input)
+	if err != nil {
+		if _, ok := err.(awserr.RequestFailure); ok {
+			return simposio.ErrSubscripcionNotFound
+		}
+		return err
+	}
+
+	return nil
+}

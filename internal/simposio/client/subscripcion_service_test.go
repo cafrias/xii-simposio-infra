@@ -72,3 +72,48 @@ func TestSubscripcionService_CreateSubscripcion_ErrSubscripcionNotFound(t *testi
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
 	}
 }
+
+func TestSubscripcionService_UpdateSubscripcion(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Create new Subscripcion.
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update Subscripcion
+	subs.Email = "mynewemail@email.com"
+	if err := s.UpdateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Retrieve Subscripcion and compare.
+	other, err := s.Subscripcion(1234)
+	if err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(&subs, other) {
+		t.Fatalf("unexpected Subscripcion: %#v", other)
+	}
+}
+
+func TestSubscripcionService_UpdateSubscripcion_ErrSubscripcionNotFound(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Create new Subscripcion.
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Update Subscripcion
+	subs.Documento = subs.Documento + 1
+	subs.Email = "mynewemail@email.com"
+	if err := s.UpdateSubscripcion(&subs); err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}

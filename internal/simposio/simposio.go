@@ -56,4 +56,6 @@ type Client interface {
 type SubscripcionService interface {
 	Subscripcion(doc int) (*Subscripcion, error)
 	CreateSubscripcion(subs *Subscripcion) error
+	UpdateSubscripcion(subs *Subscripcion) error
+	// DeleteSubscripcion(doc int) error
 }
