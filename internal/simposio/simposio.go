@@ -13,12 +13,12 @@ var Aranceles = map[string]float64{
 
 // Subscripcion represents a single subscription to the event.
 type Subscripcion struct {
-	Documento           int     `json:"documento" validate:"required"`
+	Documento           int     `json:"documento" validate:"required,gt=1000000"`
 	Apellido            string  `json:"apellido" validate:"required"`
 	Nombre              string  `json:"nombre" validate:"required"`
-	Telefono            int     `json:"telefono,omitempty"`
-	Celular             int     `json:"celular,omitempty"`
-	Fax                 int     `json:"fax,omitempty"`
+	Telefono            int     `json:"telefono,omitempty" validate:"omitempty,gt=0"`
+	Celular             int     `json:"celular,omitempty" validate:"omitempty,gt=0"`
+	Fax                 int     `json:"fax,omitempty" validate:"omitempty,gt=0"`
 	Email               string  `json:"email" validate:"required,email"`
 	Direccion           string  `json:"direccion" validate:"required"`
 	Zip                 int     `json:"zip" validate:"required,gte=1000,lt=10000"`
