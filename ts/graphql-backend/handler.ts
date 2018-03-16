@@ -4,9 +4,9 @@ interface CORSHeaders {
 }
 
 interface Response {
-        Headers: CORSHeaders,
-        StatusCode: number,
-        Message: string,
+        headers: CORSHeaders,
+        statusCode: number,
+        body: string,
 }
 
 const corsHeaders: CORSHeaders = {
@@ -15,17 +15,21 @@ const corsHeaders: CORSHeaders = {
 
 const responses: { [propName: string]: Response } = {
         OK: {
-                Headers: corsHeaders,
-                StatusCode: 200,
-                Message: "Everything OK!",
+                headers: corsHeaders,
+                statusCode: 200,
+                body: JSON.stringify({
+                        Message: "Everything OK!",
+                }),
         },
         InternalError: {
-                Headers: corsHeaders,
-                StatusCode: 500,
-                Message: "We messed up!",
+                headers: corsHeaders,
+                statusCode: 500,
+                body: JSON.stringify({
+                        Message: "We messed up!",
+                }),
         }
 }
 
 export function handler(event: AWSLambda.APIGatewayEvent, context: AWSLambda.Context, callback: AWSLambda.Callback) {
-        callback(null, responses.OK)
+        callback(null, JSON.stringify(responses.OK))
 }
