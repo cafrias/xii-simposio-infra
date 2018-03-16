@@ -38,6 +38,7 @@ custom:
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
   USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
+  SUBS_URI: subscripcion
   customDomain:
     domainName: simposio.cfrias.com.ar
     basePath: api
@@ -84,16 +85,41 @@ functions:
               - StreamArn
           batchSize: 1
   
-  graphql:
-    handler: bin/graphql
+  # List Subscripcion, allows to filter: all, pendings, confirmed.
+  list:
+    handler: bin/list
     timeout: 30
     events:
       - http:
-          path: /graphql
-          method: post
+          path: /${self:custom.SUBS_URI}/list
+          method: get
           cors: true
           authorizer:
             arn: ${self:custom.USER_POOL_ARN}
+  
+  subscripcionRUD:
+    handler: bin/subscripcion
+    timeout: 30
+    events:
+      - http:
+          path: /${self:custom.SUBS_URI}
+          method: get
+          cors: true
+          authorizer:
+            arn: ${self:custom.USER_POOL_ARN}
+      - http:
+          path: /${self:custom.SUBS_URI}
+          method: put
+          cors: true
+          authorizer:
+            arn: ${self:custom.USER_POOL_ARN}
+      - http:
+          path: /${self:custom.SUBS_URI}
+          method: delete
+          cors: true
+          authorizer:
+            arn: ${self:custom.USER_POOL_ARN}
+
 
 # you can add CloudFormation resource templates here
 resources:
