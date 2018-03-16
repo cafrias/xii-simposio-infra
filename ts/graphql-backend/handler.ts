@@ -1,19 +1,13 @@
 interface CORSHeaders {
         'Access-Control-Allow-Origin': string,
-        [propName: string]: string,
-}
-
-interface Response {
-        headers: CORSHeaders,
-        statusCode: number,
-        body: string,
+        [propName: string]: string | boolean | number,
 }
 
 const corsHeaders: CORSHeaders = {
         'Access-Control-Allow-Origin': '*',
 }
 
-const responses: { [propName: string]: Response } = {
+const responses: { [propName: string]: AWSLambda.APIGatewayProxyResult } = {
         OK: {
                 headers: corsHeaders,
                 statusCode: 200,
@@ -31,5 +25,6 @@ const responses: { [propName: string]: Response } = {
 }
 
 export function handler(event: AWSLambda.APIGatewayEvent, context: AWSLambda.Context, callback: AWSLambda.Callback) {
-        callback(null, JSON.stringify(responses.OK))
+        console.log("Executing ...")
+        callback(null, responses.OK)
 }
