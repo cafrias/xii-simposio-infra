@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 )
 
@@ -164,4 +165,32 @@ func (s *SubscripcionService) setConfirmado(doc int, val bool) error {
 	}
 
 	return nil
+}
+
+// Subscripciones returns all 'Subscripcion' items in database.
+func (s *SubscripcionService) Subscripciones() ([]*simposio.Subscripcion, error) {
+	expr, err := expression.NewBuilder().Build()
+	input := &dynamodb.ScanInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		FilterExpression:          expr.Filter(),
+		TableName:                 aws.String(s.client.TableName),
+	}
+	result, err := s.client.db.Scan(input)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret []*simposio.Subscripcion
+	for _, i := range result.Items {
+		var item simposio.Subscripcion
+		err := dynamodbattribute.UnmarshalMap(i, &item)
+		if err != nil {
+			return nil, err
+		}
+
+		ret = append(ret, &item)
+	}
+
+	return ret, nil
 }

@@ -60,5 +60,7 @@ type SubscripcionService interface {
 	DeleteSubscripcion(doc int) error
 	Confirmar(doc int) error
 	Pendiente(doc int) error
-	// Subscripciones(filter string) ([]*Subscripcion, error)
+	Subscripciones() ([]*Subscripcion, error)
+	// SubscripcionesPendientes() ([]*Subscripcion, error)
+	// SubscripcionesConfirmadas() ([]*Subscripcion, error)
 }
