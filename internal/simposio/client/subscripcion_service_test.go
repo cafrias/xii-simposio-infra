@@ -151,3 +151,83 @@ func TestSubscripcionService_DeleteSubscripcion_ErrSubscripcionNotFound(t *testi
 		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
 	}
 }
+
+func TestSubscripcionService_Confirmar(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Create new Subscripcion.
+	subs.Confirmado = false
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Confirmar
+	if err := s.Confirmar(subs.Documento); err != nil {
+		t.Fatal(err)
+	}
+
+	// Try retrieve Subscripcion.
+	confSubs, err := s.Subscripcion(subs.Documento)
+	if err != nil {
+		t.Fatal("Unexpected error, ", err)
+	}
+
+	if confSubs.Confirmado != true {
+		t.Fatal("Didn't set 'confirmado' to true.")
+	}
+}
+
+func TestSubscripcionService_Confirmar_ErrSubscripcionNotFound(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Confirmar non existing Subscripcion
+	if err := s.Confirmar(subs.Documento); err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}
+
+func TestSubscripcionService_Pendiente(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Create new Subscripcion.
+	subs.Confirmado = true
+	if err := s.CreateSubscripcion(&subs); err != nil {
+		t.Fatal(err)
+	}
+
+	// Pendiente
+	if err := s.Pendiente(subs.Documento); err != nil {
+		t.Fatal(err)
+	}
+
+	// Try retrieve Subscripcion.
+	confSubs, err := s.Subscripcion(subs.Documento)
+	if err != nil {
+		t.Fatal("Unexpected error, ", err)
+	}
+
+	if confSubs.Confirmado != false {
+		t.Fatal("Didn't set 'confirmado' to false.")
+	}
+}
+
+func TestSubscripcionService_Pendiente_ErrSubscripcionNotFound(t *testing.T) {
+	setUp()
+	c := MustOpenClient()
+	defer c.Close()
+	s := c.SubscripcionService()
+
+	// Pendiente non existing Subscripcion
+	if err := s.Pendiente(subs.Documento); err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Doesn't throw expected error 'ErrSubscripcionNotFound'")
+	}
+}

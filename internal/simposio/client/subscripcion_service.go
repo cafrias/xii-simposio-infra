@@ -99,21 +99,63 @@ func (s *SubscripcionService) UpdateSubscripcion(subs *simposio.Subscripcion) er
 
 // DeleteSubscripcion removes a Subscripcion.
 func (s *SubscripcionService) DeleteSubscripcion(doc int) error {
+	docStr := aws.String(strconv.Itoa(doc))
 	input := &dynamodb.DeleteItemInput{
 		ConditionExpression: aws.String("documento = :doc"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":doc": {
-				N: aws.String(strconv.Itoa(doc)),
+				N: docStr,
 			},
 		},
 		Key: map[string]*dynamodb.AttributeValue{
 			"documento": {
-				N: aws.String(strconv.Itoa(doc)),
+				N: docStr,
 			},
 		},
 		TableName: aws.String(s.client.TableName),
 	}
 	_, err := s.client.db.DeleteItem(input)
+	if err != nil {
+		if _, ok := err.(awserr.RequestFailure); ok {
+			return simposio.ErrSubscripcionNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+// Confirmar updates field Confirmado for given Subscripcion.
+func (s *SubscripcionService) Confirmar(doc int) error {
+	return s.setConfirmado(doc, true)
+}
+
+// Pendiente updates field Confirmado for given Subscripcion.
+func (s *SubscripcionService) Pendiente(doc int) error {
+	return s.setConfirmado(doc, false)
+}
+
+func (s *SubscripcionService) setConfirmado(doc int, val bool) error {
+	docStr := aws.String(strconv.Itoa(doc))
+	input := &dynamodb.UpdateItemInput{
+		ConditionExpression: aws.String("documento = :doc"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":doc": {
+				N: docStr,
+			},
+			":conf": {
+				BOOL: aws.Bool(val),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"documento": {
+				N: docStr,
+			},
+		},
+		TableName:        aws.String(s.client.TableName),
+		UpdateExpression: aws.String("set confirmado = :conf"),
+	}
+	_, err := s.client.db.UpdateItem(input)
 	if err != nil {
 		if _, ok := err.(awserr.RequestFailure); ok {
 			return simposio.ErrSubscripcionNotFound
