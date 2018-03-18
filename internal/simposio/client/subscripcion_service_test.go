@@ -245,3 +245,71 @@ func TestSubscripcionService_Subscripciones(t *testing.T) {
 		}
 	}
 }
+
+func TestSubscripcionService_SubscripcionesPendientes(t *testing.T) {
+	c, s := setUp()
+	defer c.Close()
+
+	// Create two 'Subscripcion' items.
+	fix := map[int]simposio.Subscripcion{
+		1: simposio.Subscripcion{
+			Documento:  1,
+			Confirmado: true,
+		},
+		2: simposio.Subscripcion{
+			Documento:  2,
+			Confirmado: false,
+		},
+	}
+	for _, i := range fix {
+		if err := s.CreateSubscripcion(&i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Fetch all subscripcion items.
+	res, err := s.SubscripcionesPendientes()
+	if err != nil {
+		t.Fatal("Unexpected error, ", err)
+	}
+	if n := len(res); n != 1 {
+		t.Fatal("Unexpected number of items, ", n)
+	}
+	if reflect.DeepEqual(*res[0], fix[2]) == false {
+		t.Fatal("Expected and actual aren't the same.", res[0], fix[2])
+	}
+}
+
+func TestSubscripcionService_SubscripcionesConfirmadas(t *testing.T) {
+	c, s := setUp()
+	defer c.Close()
+
+	// Create two 'Subscripcion' items.
+	fix := map[int]simposio.Subscripcion{
+		1: simposio.Subscripcion{
+			Documento:  1,
+			Confirmado: true,
+		},
+		2: simposio.Subscripcion{
+			Documento:  2,
+			Confirmado: false,
+		},
+	}
+	for _, i := range fix {
+		if err := s.CreateSubscripcion(&i); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// Fetch all subscripcion items.
+	res, err := s.SubscripcionesConfirmadas()
+	if err != nil {
+		t.Fatal("Unexpected error, ", err)
+	}
+	if n := len(res); n != 1 {
+		t.Fatal("Unexpected number of items, ", n)
+	}
+	if reflect.DeepEqual(*res[0], fix[1]) == false {
+		t.Fatal("Expected and actual aren't the same.", res[0], fix[1])
+	}
+}

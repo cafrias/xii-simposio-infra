@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -167,9 +168,21 @@ func (s *SubscripcionService) setConfirmado(doc int, val bool) error {
 	return nil
 }
 
-// Subscripciones returns all 'Subscripcion' items in database.
-func (s *SubscripcionService) Subscripciones() ([]*simposio.Subscripcion, error) {
-	expr, err := expression.NewBuilder().Build()
+func (s *SubscripcionService) getSubscripciones(filter string) ([]*simposio.Subscripcion, error) {
+	var builder expression.Builder
+	switch filter {
+	case "all":
+		builder = expression.NewBuilder()
+	case "pendientes":
+		filt := expression.Name("confirmado").Equal(expression.Value(false))
+		builder = expression.NewBuilder().WithFilter(filt)
+	case "confirmadas":
+		filt := expression.Name("confirmado").Equal(expression.Value(true))
+		builder = expression.NewBuilder().WithFilter(filt)
+	default:
+		return nil, errors.New("Unexpected filter")
+	}
+	expr, _ := builder.Build()
 	input := &dynamodb.ScanInput{
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
@@ -193,4 +206,19 @@ func (s *SubscripcionService) Subscripciones() ([]*simposio.Subscripcion, error)
 	}
 
 	return ret, nil
+}
+
+// Subscripciones returns all 'Subscripcion' items in database.
+func (s *SubscripcionService) Subscripciones() ([]*simposio.Subscripcion, error) {
+	return s.getSubscripciones("all")
+}
+
+// SubscripcionesPendientes returns all 'Subscripcion' items marked as 'Pendiente'.
+func (s *SubscripcionService) SubscripcionesPendientes() ([]*simposio.Subscripcion, error) {
+	return s.getSubscripciones("pendientes")
+}
+
+// SubscripcionesConfirmadas returns all 'Subscripcion' items marked as 'Confirmada'.
+func (s *SubscripcionService) SubscripcionesConfirmadas() ([]*simposio.Subscripcion, error) {
+	return s.getSubscripciones("confirmadas")
 }
