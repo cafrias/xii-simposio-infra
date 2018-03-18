@@ -1,14 +1,19 @@
 package api
 
-import "os"
+import (
+	"os"
+
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/validators"
+)
 
 // Headers represents the headers for a response to API Gateway
 type Headers map[string]string
 
 // Body represents the body for all responses to API Gateway
 type Body struct {
-	LogID string `json:"log_id"`
-	Msg   string `json:"message"`
+	LogID  string                       `json:"log_id"`
+	Msg    string                       `json:"message"`
+	Errors []validators.ValidationError `json:"errors,omitempty"`
 }
 
 // DefaultHeaders generate shared headers for all responses.

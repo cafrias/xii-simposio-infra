@@ -60,17 +60,6 @@ package:
    - ./bin/**
 
 functions:
-  validator:
-    handler: bin/validator
-    timeout: 30
-    environment:
-      TABLE_NAME: ${self:custom.TABLE_NAME}
-    events:
-      - http:
-          path: /
-          method: post
-          cors: true
-
   mailer:
     handler: bin/mailer
     timeout: 60
@@ -97,10 +86,17 @@ functions:
           authorizer:
             arn: ${self:custom.USER_POOL_ARN}
   
-  subscripcionRUD:
+  subscripcionCRUD:
     handler: bin/subscripcion
     timeout: 30
+    environment:
+      TABLE_NAME: ${self:custom.TABLE_NAME}
+      ALLOWED_ORIGINS: '*'
     events:
+      - http:
+          path: /${self:custom.SUBS_URI}
+          method: post
+          cors: true
       - http:
           path: /${self:custom.SUBS_URI}
           method: get

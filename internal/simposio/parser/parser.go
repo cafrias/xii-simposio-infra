@@ -6,8 +6,8 @@ import (
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 )
 
-// Parse parses JSON string into simposio.Suscripcion
-func Parse(str string) (*simposio.Subscripcion, error) {
+// ParseSubscripcion parses JSON string into simposio.Suscripcion
+func ParseSubscripcion(str string) (*simposio.Subscripcion, error) {
 	var subs simposio.Subscripcion
 
 	if err := json.Unmarshal([]byte(str), &subs); err != nil {
