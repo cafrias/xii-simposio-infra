@@ -21,27 +21,29 @@ import (
 
 // Response messages.
 const (
-	ErrValidationMsg         = "Error de validación en Subscripción."
-	ErrRequestMsg            = "Petición mal formada, contacte con soporte."
-	ErrInternalMsg           = "Error Interno, contacte con soporte."
-	ErrSubscripcionExistsMsg = "Ya se registró un usuario con ese Documento."
-	SucSavingSubscipcionMsg  = "Subscripción registrada con éxito."
+	ErrValidationMsg           = "Error de validación en Subscripción."
+	ErrRequestMsg              = "Petición mal formada, contacte con soporte."
+	ErrInternalMsg             = "Error Interno, contacte con soporte."
+	ErrSubscripcionExistsMsg   = "Ya se registró un usuario con ese Documento."
+	ErrSubscripcionNotFoundMsg = "No se encuentra subscripción con ese Documento."
+	SucSavingSubscipcionMsg    = "Subscripción registrada con éxito."
 )
 
 // Log messages.
 const (
-	ErrUUIDLog               = "Couldn't generate UUID."
-	ErrRequestLog            = "Request body is invalid!"
-	ErrValidationLog         = "Validation Error\n"
-	ErrParsingBodyToJSON     = "Error parsing body to JSON"
-	ErrDynamoDBConnectionLog = "Error while trying to open connection to DynamoDB"
-	ErrSavingSubscripcionLog = "Error while trying to write Subscripcion with 'Documento' %v to DynamoDB\n"
-	ErrSubscripcionExistsLog = "Subscripcion with 'Documento' %v already exists!\n"
-	ErrUnexpectedHTTPMethod  = "Unexpected HTTP method '%s'\n"
-	SucSavingSubscripcionLog = "Subscripcion with 'Documento' %v successfully saved\n"
+	ErrUUIDLog                 = "Couldn't generate UUID."
+	ErrRequestLog              = "Request body is invalid!"
+	ErrValidationLog           = "Validation Error\n"
+	ErrParsingBodyToJSON       = "Error parsing body to JSON"
+	ErrDynamoDBConnectionLog   = "Error while trying to open connection to DynamoDB"
+	ErrSavingSubscripcionLog   = "Error while trying to write Subscripcion with 'Documento' %v to DynamoDB\n"
+	ErrSubscripcionExistsLog   = "Subscripcion with 'Documento' %v already exists!\n"
+	ErrSubscripcionNotFoundLog = "Subscripcion with 'Documento' %v not found!\n"
+	ErrUnexpectedHTTPMethod    = "Unexpected HTTP method '%s'\n"
+	SucSavingSubscripcionLog   = "Subscripcion with 'Documento' %v successfully saved\n"
 )
 
-func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
+func handlePOST(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
 	b := req.Body
 
 	// Parse body
@@ -81,6 +83,46 @@ func handleReq(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	return 201, api.Body{LogID: reqID, Msg: SucSavingSubscipcionMsg}, nil
 }
 
+func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
+	b := req.Body
+
+	// Parse body
+	subs, err := parser.ParseSubscripcion(b)
+	if err != nil {
+		fmt.Println(ErrRequestLog, err.Error())
+		return 400, api.Body{LogID: reqID, Msg: ErrRequestMsg}, nil
+	}
+
+	// Validate Subscripcion struct
+	errors := validators.ValidateSubscripcion(subs)
+	if errors != nil {
+		return 400, api.Body{LogID: reqID, Msg: ErrValidationMsg, Errors: errors}, nil
+	}
+
+	// Open DynamoDB connection
+	c := client.NewClient()
+	err = c.Open()
+	if err != nil {
+		fmt.Println(ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+	}
+
+	// Write new Subscripcion to DB.
+	err = c.SubscripcionService().UpdateSubscripcion(subs)
+	if err != nil {
+		if err == simposio.ErrSubscripcionNotFound {
+			fmt.Printf(ErrSubscripcionNotFoundLog, subs.Documento)
+			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionNotFoundMsg}, nil
+		}
+		fmt.Printf(ErrSavingSubscripcionLog, subs.Documento)
+		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+	}
+
+	fmt.Printf(SucSavingSubscripcionLog, subs.Documento)
+
+	return 201, api.Body{LogID: reqID, Msg: SucSavingSubscipcionMsg}, nil
+}
+
 // Handler is used by AWS Lambda to handle request.
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Get AWS request ID
@@ -94,7 +136,9 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	var err error
 	switch HTTPMethod {
 	case "POST":
-		st, b, err = handleReq(reqID, req)
+		st, b, err = handlePOST(reqID, req)
+	case "PUT":
+		st, b, err = handlePUT(reqID, req)
 	default:
 		fmt.Printf(ErrUnexpectedHTTPMethod, HTTPMethod)
 		st = 400

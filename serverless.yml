@@ -3,6 +3,7 @@ service: xii-simposio-infra
 plugins:
   - serverless-dynamodb-local
   - serverless-domain-manager
+  - serverless-offline
 
 provider:
   name: aws
