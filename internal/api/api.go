@@ -11,9 +11,10 @@ type Headers map[string]string
 
 // Body represents the body for all responses to API Gateway
 type Body struct {
-	LogID  string                       `json:"log_id"`
-	Msg    string                       `json:"message"`
-	Errors []validators.ValidationError `json:"errors,omitempty"`
+	LogID   string                       `json:"log_id"`
+	Msg     string                       `json:"message"`
+	Payload interface{}                  `json:"payload"`
+	Errors  []validators.ValidationError `json:"errors,omitempty"`
 }
 
 // DefaultHeaders generate shared headers for all responses.
