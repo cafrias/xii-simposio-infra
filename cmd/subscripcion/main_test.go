@@ -2,9 +2,11 @@ package main_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
@@ -109,4 +111,61 @@ func TestGET_ErrSubscripcionNotFoundMsg(t *testing.T) {
 		Status(http.StatusBadRequest).
 		JSON().Object().
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
+}
+
+func TestPOST(t *testing.T) {
+	c := setUp(t)
+	defer tearDown(t)
+
+	var subs simposio.Subscripcion
+	err := ReadJSONFixture("testdata/OK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.POST("/subscripcion").WithHeader("Content-Type", "application/json").
+		WithJSON(subs).
+		Expect().
+		Status(http.StatusCreated).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.SucSavingSubscipcionMsg)
+
+	subsDB, err := c.SubscripcionService().Subscripcion(subs.Documento)
+	if err != nil {
+		t.Fatal("Error while fetching from db, ", err)
+	}
+
+	if reflect.DeepEqual(subsDB, &subs) == false {
+		fmt.Printf("Expected: %v\n", subs)
+		fmt.Printf("Received: %v\n", subsDB)
+		t.Fatal("Subscripcion not the same as saved on DB.")
+	}
+}
+
+func TestPOST_ErrSubscripcionExistsMsg(t *testing.T) {
+	c := setUp(t)
+	defer tearDown(t)
+
+	var subs simposio.Subscripcion
+	err := ReadJSONFixture("testdata/OK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
+
+	// Populate DB with fixture.
+	err = c.SubscripcionService().CreateSubscripcion(&subs)
+	if err != nil {
+		t.Fatal("Error while writing to DynamoDB, ", err)
+	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.POST("/subscripcion").WithHeader("Content-Type", "application/json").
+		WithJSON(subs).
+		Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionExistsMsg)
 }
