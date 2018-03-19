@@ -30,6 +30,7 @@ const (
 	ErrQueryParamDocInvalidMsg = "Debe indicar un documento valido para buscar."
 	SucSavingSubscipcionMsg    = "Subscripción registrada con éxito."
 	SucFetchingSubscripcionMsg = "Subscripción encontrada con éxito."
+	SucDeletingSubscripcionMsg = "Subscripción eliminada con éxito."
 )
 
 // Log messages.
@@ -41,12 +42,14 @@ const (
 	ErrDynamoDBConnectionLog   = "Error while trying to open connection to DynamoDB"
 	ErrSavingSubscripcionLog   = "Error while trying to write Subscripcion with 'Documento' %v to DynamoDB\n"
 	ErrFetchingSubscripcionLog = "Error while trying to fetch Subscripcion with 'Documento' %v to DynamoDB\n"
+	ErrDeletingSubscripcionLog = "Error while trying to delete Subscripcion with 'Documento' %v to DynamoDB\n"
 	ErrSubscripcionExistsLog   = "Subscripcion with 'Documento' %v already exists!\n"
 	ErrSubscripcionNotFoundLog = "Subscripcion with 'Documento' %v not found!\n"
 	ErrUnexpectedHTTPMethodLog = "Unexpected HTTP method '%s'\n"
 	ErrQueryParamDocInvalidLog = "Invalid 'doc' query param '%v'\n"
 	SucSavingSubscripcionLog   = "Subscripcion with 'Documento' %v successfully saved\n"
 	SucFetchingSubscripcionLog = "Subscripcion with 'Documento' %v successfully fetched\n"
+	SucDeletingSubscripcionLog = "Subscripcion with 'Documento' %v successfully deleted\n"
 )
 
 func handlePOST(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
@@ -158,6 +161,36 @@ func handleGET(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	return 200, api.Body{LogID: reqID, Msg: SucFetchingSubscripcionMsg, Payload: subs}, nil
 }
 
+func handleDELETE(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
+	docStr := req.QueryStringParameters["doc"]
+	doc, err := strconv.Atoi(docStr)
+	if err != nil {
+		fmt.Printf(ErrQueryParamDocInvalidLog, docStr)
+		return 400, api.Body{LogID: reqID, Msg: ErrQueryParamDocInvalidMsg}, nil
+	}
+
+	// Open DynamoDB connection
+	c := client.NewClient()
+	err = c.Open()
+	if err != nil {
+		fmt.Println(ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+	}
+
+	err = c.SubscripcionService().DeleteSubscripcion(doc)
+	if err != nil {
+		if err == simposio.ErrSubscripcionNotFound {
+			fmt.Printf(ErrSubscripcionNotFoundLog, doc)
+			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionNotFoundMsg}, nil
+		}
+		fmt.Printf(ErrDeletingSubscripcionLog, doc)
+		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+	}
+
+	fmt.Printf(SucDeletingSubscripcionLog, doc)
+	return 200, api.Body{LogID: reqID, Msg: SucDeletingSubscripcionMsg}, nil
+}
+
 // Handler is used by AWS Lambda to handle request.
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Get AWS request ID
@@ -176,6 +209,8 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 		st, b, err = handlePUT(reqID, req)
 	case "GET":
 		st, b, err = handleGET(reqID, req)
+	case "DELETE":
+		st, b, err = handleDELETE(reqID, req)
 	default:
 		fmt.Printf(ErrUnexpectedHTTPMethodLog, HTTPMethod)
 		st = 400

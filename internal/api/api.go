@@ -13,7 +13,7 @@ type Headers map[string]string
 type Body struct {
 	LogID   string                       `json:"log_id"`
 	Msg     string                       `json:"message"`
-	Payload interface{}                  `json:"payload"`
+	Payload interface{}                  `json:"payload,omitempty"`
 	Errors  []validators.ValidationError `json:"errors,omitempty"`
 }
 
