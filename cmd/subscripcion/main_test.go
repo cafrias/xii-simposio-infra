@@ -76,30 +76,30 @@ func ReadJSONFixture(path string, structure interface{}) error {
 	return nil
 }
 
-func TestPOST_ErrSubscripcionExistsMsg(t *testing.T) {
+func TestGET(t *testing.T) {
 	c := setUp(t)
 	defer tearDown(t)
-	var subs simposio.Subscripcion
 
+	var subs simposio.Subscripcion
 	err := ReadJSONFixture("testdata/OK.json", &subs)
 	if err != nil {
 		t.Fatal("Error while reading fixture, ", err)
 	}
 
+	// Populate DB with fixture.
 	err = c.SubscripcionService().CreateSubscripcion(&subs)
 	if err != nil {
 		t.Fatal("Error while writing to DynamoDB, ", err)
 	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.GET("/subscripcion").WithQuery("doc", subs.Documento).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object().
+		ContainsKey("payload").ValueEqual("payload", subs)
 }
-
-// func TestGET(t *testing.T) {
-// 	e := httpexpect.New(t, HTTPEndpoint)
-
-// 	e.GET("/subscripcion").WithQuery("doc", 1234).
-// 		Expect().
-// 		Status(http.StatusOK).
-// 		Body().Contains(messages.ErrSubscripcionNotFoundMsg)
-// }
 
 func TestGET_ErrSubscripcionNotFoundMsg(t *testing.T) {
 	e := httpexpect.New(t, HTTPEndpoint)
@@ -107,5 +107,6 @@ func TestGET_ErrSubscripcionNotFoundMsg(t *testing.T) {
 	e.GET("/subscripcion").WithQuery("doc", 1234).
 		Expect().
 		Status(http.StatusBadRequest).
-		JSON().Object().ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
 }
