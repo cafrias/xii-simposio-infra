@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambdacontext"
 
+	"github.com/friasdesign/xii-simposio-infra/cmd/subscripcion/messages"
 	"github.com/friasdesign/xii-simposio-infra/internal/api"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
@@ -20,76 +21,44 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-// Response messages.
-const (
-	ErrValidationMsg           = "Error de validación en Subscripción."
-	ErrRequestMsg              = "Petición mal formada, contacte con soporte."
-	ErrInternalMsg             = "Error Interno, contacte con soporte."
-	ErrSubscripcionExistsMsg   = "Ya se registró un usuario con ese Documento."
-	ErrSubscripcionNotFoundMsg = "No se encuentra subscripción con ese Documento."
-	ErrQueryParamDocInvalidMsg = "Debe indicar un documento valido para buscar."
-	SucSavingSubscipcionMsg    = "Subscripción registrada con éxito."
-	SucFetchingSubscripcionMsg = "Subscripción encontrada con éxito."
-	SucDeletingSubscripcionMsg = "Subscripción eliminada con éxito."
-)
-
-// Log messages.
-const (
-	ErrUUIDLog                 = "Couldn't generate UUID."
-	ErrRequestLog              = "Request body is invalid!"
-	ErrValidationLog           = "Validation Error\n"
-	ErrParsingBodyToJSON       = "Error parsing body to JSON"
-	ErrDynamoDBConnectionLog   = "Error while trying to open connection to DynamoDB"
-	ErrSavingSubscripcionLog   = "Error while trying to write Subscripcion with 'Documento' %v to DynamoDB\n"
-	ErrFetchingSubscripcionLog = "Error while trying to fetch Subscripcion with 'Documento' %v to DynamoDB\n"
-	ErrDeletingSubscripcionLog = "Error while trying to delete Subscripcion with 'Documento' %v to DynamoDB\n"
-	ErrSubscripcionExistsLog   = "Subscripcion with 'Documento' %v already exists!\n"
-	ErrSubscripcionNotFoundLog = "Subscripcion with 'Documento' %v not found!\n"
-	ErrUnexpectedHTTPMethodLog = "Unexpected HTTP method '%s'\n"
-	ErrQueryParamDocInvalidLog = "Invalid 'doc' query param '%v'\n"
-	SucSavingSubscripcionLog   = "Subscripcion with 'Documento' %v successfully saved\n"
-	SucFetchingSubscripcionLog = "Subscripcion with 'Documento' %v successfully fetched\n"
-	SucDeletingSubscripcionLog = "Subscripcion with 'Documento' %v successfully deleted\n"
-)
-
 func handlePOST(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
 	b := req.Body
 
 	// Parse body
 	subs, err := parser.ParseSubscripcion(b)
 	if err != nil {
-		fmt.Println(ErrRequestLog, err.Error())
-		return 400, api.Body{LogID: reqID, Msg: ErrRequestMsg}, nil
+		fmt.Println(messages.ErrRequestLog, err.Error())
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrRequestMsg}, nil
 	}
 
 	// Validate Subscripcion struct
 	errors := validators.ValidateSubscripcion(subs)
 	if errors != nil {
-		return 400, api.Body{LogID: reqID, Msg: ErrValidationMsg, Errors: errors}, nil
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrValidationMsg, Errors: errors}, nil
 	}
 
 	// Open DynamoDB connection
 	c := client.NewClient()
 	err = c.Open()
 	if err != nil {
-		fmt.Println(ErrDynamoDBConnectionLog)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Println(messages.ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
 	// Write new Subscripcion to DB.
 	err = c.SubscripcionService().CreateSubscripcion(subs)
 	if err != nil {
 		if err == simposio.ErrSubscripcionExists {
-			fmt.Printf(ErrSubscripcionExistsLog, subs.Documento)
-			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionExistsMsg}, nil
+			fmt.Printf(messages.ErrSubscripcionExistsLog, subs.Documento)
+			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionExistsMsg}, nil
 		}
-		fmt.Printf(ErrSavingSubscripcionLog, subs.Documento)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Printf(messages.ErrSavingSubscripcionLog, subs.Documento)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
-	fmt.Printf(SucSavingSubscripcionLog, subs.Documento)
+	fmt.Printf(messages.SucSavingSubscripcionLog, subs.Documento)
 
-	return 201, api.Body{LogID: reqID, Msg: SucSavingSubscipcionMsg}, nil
+	return 201, api.Body{LogID: reqID, Msg: messages.SucSavingSubscipcionMsg}, nil
 }
 
 func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
@@ -98,97 +67,97 @@ func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	// Parse body
 	subs, err := parser.ParseSubscripcion(b)
 	if err != nil {
-		fmt.Println(ErrRequestLog, err.Error())
-		return 400, api.Body{LogID: reqID, Msg: ErrRequestMsg}, nil
+		fmt.Println(messages.ErrRequestLog, err.Error())
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrRequestMsg}, nil
 	}
 
 	// Validate Subscripcion struct
 	errors := validators.ValidateSubscripcion(subs)
 	if errors != nil {
-		return 400, api.Body{LogID: reqID, Msg: ErrValidationMsg, Errors: errors}, nil
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrValidationMsg, Errors: errors}, nil
 	}
 
 	// Open DynamoDB connection
 	c := client.NewClient()
 	err = c.Open()
 	if err != nil {
-		fmt.Println(ErrDynamoDBConnectionLog)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Println(messages.ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
 	// Write new Subscripcion to DB.
 	err = c.SubscripcionService().UpdateSubscripcion(subs)
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
-			fmt.Printf(ErrSubscripcionNotFoundLog, subs.Documento)
-			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionNotFoundMsg}, nil
+			fmt.Printf(messages.ErrSubscripcionNotFoundLog, subs.Documento)
+			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
-		fmt.Printf(ErrSavingSubscripcionLog, subs.Documento)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Printf(messages.ErrSavingSubscripcionLog, subs.Documento)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
-	fmt.Printf(SucSavingSubscripcionLog, subs.Documento)
-	return 201, api.Body{LogID: reqID, Msg: SucSavingSubscipcionMsg}, nil
+	fmt.Printf(messages.SucSavingSubscripcionLog, subs.Documento)
+	return 201, api.Body{LogID: reqID, Msg: messages.SucSavingSubscipcionMsg}, nil
 }
 
 func handleGET(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
 	docStr := req.QueryStringParameters["doc"]
 	doc, err := strconv.Atoi(docStr)
 	if err != nil {
-		fmt.Printf(ErrQueryParamDocInvalidLog, docStr)
-		return 400, api.Body{LogID: reqID, Msg: ErrQueryParamDocInvalidMsg}, nil
+		fmt.Printf(messages.ErrQueryParamDocInvalidLog, docStr)
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrQueryParamDocInvalidMsg}, nil
 	}
 
 	// Open DynamoDB connection
 	c := client.NewClient()
 	err = c.Open()
 	if err != nil {
-		fmt.Println(ErrDynamoDBConnectionLog)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Println(messages.ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
 	subs, err := c.SubscripcionService().Subscripcion(doc)
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
-			fmt.Printf(ErrSubscripcionNotFoundLog, doc)
-			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionNotFoundMsg}, nil
+			fmt.Printf(messages.ErrSubscripcionNotFoundLog, doc)
+			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
-		fmt.Printf(ErrFetchingSubscripcionLog, doc)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Printf(messages.ErrFetchingSubscripcionLog, doc)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
-	fmt.Printf(SucFetchingSubscripcionLog, subs.Documento)
-	return 200, api.Body{LogID: reqID, Msg: SucFetchingSubscripcionMsg, Payload: subs}, nil
+	fmt.Printf(messages.SucFetchingSubscripcionLog, subs.Documento)
+	return 200, api.Body{LogID: reqID, Msg: messages.SucFetchingSubscripcionMsg, Payload: subs}, nil
 }
 
 func handleDELETE(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
 	docStr := req.QueryStringParameters["doc"]
 	doc, err := strconv.Atoi(docStr)
 	if err != nil {
-		fmt.Printf(ErrQueryParamDocInvalidLog, docStr)
-		return 400, api.Body{LogID: reqID, Msg: ErrQueryParamDocInvalidMsg}, nil
+		fmt.Printf(messages.ErrQueryParamDocInvalidLog, docStr)
+		return 400, api.Body{LogID: reqID, Msg: messages.ErrQueryParamDocInvalidMsg}, nil
 	}
 
 	// Open DynamoDB connection
 	c := client.NewClient()
 	err = c.Open()
 	if err != nil {
-		fmt.Println(ErrDynamoDBConnectionLog)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Println(messages.ErrDynamoDBConnectionLog)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
 	err = c.SubscripcionService().DeleteSubscripcion(doc)
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
-			fmt.Printf(ErrSubscripcionNotFoundLog, doc)
-			return 400, api.Body{LogID: reqID, Msg: ErrSubscripcionNotFoundMsg}, nil
+			fmt.Printf(messages.ErrSubscripcionNotFoundLog, doc)
+			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
-		fmt.Printf(ErrDeletingSubscripcionLog, doc)
-		return 500, api.Body{LogID: reqID, Msg: ErrInternalMsg}, err
+		fmt.Printf(messages.ErrDeletingSubscripcionLog, doc)
+		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
 	}
 
-	fmt.Printf(SucDeletingSubscripcionLog, doc)
-	return 200, api.Body{LogID: reqID, Msg: SucDeletingSubscripcionMsg}, nil
+	fmt.Printf(messages.SucDeletingSubscripcionLog, doc)
+	return 200, api.Body{LogID: reqID, Msg: messages.SucDeletingSubscripcionMsg}, nil
 }
 
 // Handler is used by AWS Lambda to handle request.
@@ -212,7 +181,7 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	case "DELETE":
 		st, b, err = handleDELETE(reqID, req)
 	default:
-		fmt.Printf(ErrUnexpectedHTTPMethodLog, HTTPMethod)
+		fmt.Printf(messages.ErrUnexpectedHTTPMethodLog, HTTPMethod)
 		st = 400
 		b = api.Body{}
 		err = errors.New("Unexpected HTTP method")
@@ -221,7 +190,7 @@ func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.API
 	// Convert body to JSON.
 	bs, jerr := json.Marshal(b)
 	if jerr != nil {
-		fmt.Println(ErrParsingBodyToJSON)
+		fmt.Println(messages.ErrParsingBodyToJSON)
 		st = 500
 		bs = []byte{}
 		err = jerr

@@ -1,0 +1,369 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: 'SAM template for Serverless framework service: '
+Resources:
+  SubscribersTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: xii-simposio-dev-subscripciones
+      AttributeDefinitions:
+        - AttributeName: documento
+          AttributeType: 'N'
+      KeySchema:
+        - AttributeName: documento
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+  Mailer:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: bin/mailer
+      Runtime: go1.x
+      CodeUri: >-
+        /home/cfrias/go/src/github.com/friasdesign/xii-simposio-infra/.serverless/xii-simposio-infra.zip
+      MemorySize: 128
+      Timeout: 60
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:DescribeTable'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+                - 'dynamodb:DescribeStream'
+                - 'dynamodb:GetRecords'
+                - 'dynamodb:GetShardIterator'
+                - 'dynamodb:ListStreams'
+              Resource:
+                'Fn::GetAtt':
+                  - SubscribersTable
+                  - Arn
+            - Effect: Allow
+              Action:
+                - 'ses:sendEmail'
+              Resource: '*'
+      Environment:
+        Variables:
+          EMAIL: carlos.a.frias@gmail.com
+      Events:
+        Event1:
+          Type: Dynamodb
+          Properties:
+            Stream:
+              'Fn::GetAtt':
+                - SubscribersTable
+                - StreamArn
+            BatchSize: 1
+  List:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: bin/list
+      Runtime: go1.x
+      CodeUri: >-
+        /home/cfrias/go/src/github.com/friasdesign/xii-simposio-infra/.serverless/xii-simposio-infra.zip
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:DescribeTable'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+                - 'dynamodb:DescribeStream'
+                - 'dynamodb:GetRecords'
+                - 'dynamodb:GetShardIterator'
+                - 'dynamodb:ListStreams'
+              Resource:
+                'Fn::GetAtt':
+                  - SubscribersTable
+                  - Arn
+            - Effect: Allow
+              Action:
+                - 'ses:sendEmail'
+              Resource: '*'
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: /subscripcion/list
+            Method: get
+            RestApiId:
+              Ref: XiiSimposioInfra
+  XiiSimposioInfra:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: dev
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title:
+            Ref: 'AWS::StackName'
+        paths:
+          /subscripcion/list:
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${List.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+          /subscripcion:
+            options:
+              x-amazon-apigateway-integration:
+                type: mock
+                requestTemplates:
+                  application/json: '{ "statusCode" : 200 }'
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,post,get,put,delete'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubscripcionCRUD.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''post'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubscripcionCRUD.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,post,get'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            put:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubscripcionCRUD.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,post,get,put'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+            delete:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri:
+                  'Fn::Sub': >-
+                    arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SubscripcionCRUD.Arn}/invocations
+                responses:
+                  default:
+                    statusCode: 200
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key'''
+                      method.response.header.Access-Control-Allow-Methods: '''options,post,get,put,delete'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+                    responseTemplates:
+                      application/json: '{}'
+              responses:
+                '200':
+                  headers:
+                    Access-Control-Allow-Headers:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Origin:
+                      type: string
+  ListLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - List
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: List
+      Principal: apigateway.amazonaws.com
+  SubscripcionCRUD:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: bin/subscripcion
+      Runtime: go1.x
+      CodeUri: >-
+        /home/cfrias/go/src/github.com/friasdesign/xii-simposio-infra/.serverless/xii-simposio-infra.zip
+      MemorySize: 128
+      Timeout: 30
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'dynamodb:DescribeTable'
+                - 'dynamodb:Scan'
+                - 'dynamodb:GetItem'
+                - 'dynamodb:PutItem'
+                - 'dynamodb:UpdateItem'
+                - 'dynamodb:DeleteItem'
+                - 'dynamodb:DescribeStream'
+                - 'dynamodb:GetRecords'
+                - 'dynamodb:GetShardIterator'
+                - 'dynamodb:ListStreams'
+              Resource:
+                'Fn::GetAtt':
+                  - SubscribersTable
+                  - Arn
+            - Effect: Allow
+              Action:
+                - 'ses:sendEmail'
+              Resource: '*'
+      Environment:
+        Variables:
+          TABLE_NAME: xii-simposio-dev-subscripciones
+          ALLOWED_ORIGINS: '*'
+      Events:
+        Event1:
+          Type: Api
+          Properties:
+            Path: /subscripcion
+            Method: post
+            RestApiId:
+              Ref: XiiSimposioInfra
+        Event2:
+          Type: Api
+          Properties:
+            Path: /subscripcion
+            Method: get
+            RestApiId:
+              Ref: XiiSimposioInfra
+        Event3:
+          Type: Api
+          Properties:
+            Path: /subscripcion
+            Method: put
+            RestApiId:
+              Ref: XiiSimposioInfra
+        Event4:
+          Type: Api
+          Properties:
+            Path: /subscripcion
+            Method: delete
+            RestApiId:
+              Ref: XiiSimposioInfra
+  SubscripcionCRUDLambdaPermission:
+    Type: 'AWS::Lambda::Permission'
+    DependsOn:
+      - SubscripcionCRUD
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName:
+        Ref: SubscripcionCRUD
+      Principal: apigateway.amazonaws.com

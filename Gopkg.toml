@@ -31,3 +31,11 @@
 [[constraint]]
   name = "gopkg.in/go-playground/validator.v9"
   version = "9.12.0"
+
+[[constraint]]
+  branch = "v1"
+  name = "gopkg.in/gavv/httpexpect.v1"
+
+[[override]]
+  branch = "master"
+  name = "github.com/valyala/fasthttp"
