@@ -90,7 +90,7 @@ func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
 			fmt.Printf(messages.ErrSubscripcionNotFoundLog, subs.Documento)
-			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
+			return 404, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
 		fmt.Printf(messages.ErrSavingSubscripcionLog, subs.Documento)
 		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
@@ -120,7 +120,7 @@ func handleGET(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
 			fmt.Printf(messages.ErrSubscripcionNotFoundLog, doc)
-			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
+			return 404, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
 		fmt.Printf(messages.ErrFetchingSubscripcionLog, doc)
 		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err
@@ -150,7 +150,7 @@ func handleDELETE(reqID string, req events.APIGatewayProxyRequest) (int, api.Bod
 	if err != nil {
 		if err == simposio.ErrSubscripcionNotFound {
 			fmt.Printf(messages.ErrSubscripcionNotFoundLog, doc)
-			return 400, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
+			return 404, api.Body{LogID: reqID, Msg: messages.ErrSubscripcionNotFoundMsg}, nil
 		}
 		fmt.Printf(messages.ErrDeletingSubscripcionLog, doc)
 		return 500, api.Body{LogID: reqID, Msg: messages.ErrInternalMsg}, err

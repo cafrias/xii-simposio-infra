@@ -33,6 +33,10 @@ func tearDown(t *testing.T) {
 	if err != nil {
 		t.Fatal("Error while scanning DynamoDB table, ", err)
 	}
+	if len(sOut.Items) == 0 {
+		// Nothing to delete
+		return
+	}
 
 	var wReqs []*dynamodb.WriteRequest
 	for _, item := range sOut.Items {
@@ -108,7 +112,7 @@ func TestGET_ErrSubscripcionNotFoundMsg(t *testing.T) {
 
 	e.GET("/subscripcion").WithQuery("doc", 1234).
 		Expect().
-		Status(http.StatusBadRequest).
+		Status(http.StatusNotFound).
 		JSON().Object().
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
 }
@@ -221,7 +225,47 @@ func TestPUT_ErrSubscripcionNotFoundMsg(t *testing.T) {
 	e.PUT("/subscripcion").WithHeader("Content-Type", "application/json").
 		WithJSON(subs).
 		Expect().
-		Status(http.StatusBadRequest).
+		Status(http.StatusNotFound).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
+}
+
+func TestDELETE(t *testing.T) {
+	c := setUp(t)
+	defer tearDown(t)
+
+	var subs simposio.Subscripcion
+	err := ReadJSONFixture("testdata/OK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
+
+	// Populate DB with fixture.
+	err = c.SubscripcionService().CreateSubscripcion(&subs)
+	if err != nil {
+		t.Fatal("Error while writing to DynamoDB, ", err)
+	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.DELETE("/subscripcion").WithQuery("doc", subs.Documento).
+		Expect().
+		Status(http.StatusOK).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.SucDeletingSubscripcionMsg)
+
+	_, err = c.SubscripcionService().Subscripcion(subs.Documento)
+	if err == nil || err != simposio.ErrSubscripcionNotFound {
+		t.Fatal("Unexpected output, ", err)
+	}
+}
+
+func TestDELETE_ErrSubscripcionNotFoundMsg(t *testing.T) {
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.DELETE("/subscripcion").WithQuery("doc", 1234).
+		Expect().
+		Status(http.StatusNotFound).
 		JSON().Object().
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
 }
