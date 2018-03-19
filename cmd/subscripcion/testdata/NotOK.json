@@ -1,0 +1,21 @@
+{
+        "apellido": "Ramirez",
+        "nombre": "Pepe diego",
+        "documento": 34186550,
+        "telefono": 542964546732,
+        "celular": 542964510169,
+        "fax": -10,
+        "email": "epep@argonio.com.ar",
+        "direccion": "Mi casa 182",
+        "localidad": "Rio Grande, Tierra del Fuego",
+        "pais": "Argentina",
+        "arancel_categoria": "general",
+        "arancel_adicional": 111.0,
+        "arancel_pago": "Recibo Nro 122245",
+        "ponencia_presenta": true,
+        "ponencia_titulo": "Algun titulo",
+        "ponencia_area": "Mecanica Cuantica",
+        "ponencia_coautores": "Martinez, Brizualdo",
+        "institucion": "UNTDF",
+        "acompanantes": 2
+}

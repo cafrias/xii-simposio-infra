@@ -174,6 +174,25 @@ func TestPOST_ErrSubscripcionExistsMsg(t *testing.T) {
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionExistsMsg)
 }
 
+func TestPOST_Invalid(t *testing.T) {
+	t.Parallel()
+
+	var subs simposio.Subscripcion
+	err := ReadJSONFixture("testdata/NotOK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.POST("/subscripcion").WithHeader("Content-Type", "application/json").
+		WithJSON(subs).
+		Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().
+		ContainsKey("errors")
+}
+
 func TestPUT(t *testing.T) {
 	c := setUp(t)
 	defer tearDown(t)
@@ -230,6 +249,25 @@ func TestPUT_ErrSubscripcionNotFoundMsg(t *testing.T) {
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
 }
 
+func TestPUT_Invalid(t *testing.T) {
+	t.Parallel()
+
+	var subs simposio.Subscripcion
+	err := ReadJSONFixture("testdata/NotOK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.PUT("/subscripcion").WithHeader("Content-Type", "application/json").
+		WithJSON(subs).
+		Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().
+		ContainsKey("errors")
+}
+
 func TestDELETE(t *testing.T) {
 	c := setUp(t)
 	defer tearDown(t)
@@ -268,4 +306,22 @@ func TestDELETE_ErrSubscripcionNotFoundMsg(t *testing.T) {
 		Status(http.StatusNotFound).
 		JSON().Object().
 		ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
+}
+
+func TestDELETE_ErrQueryParamDocInvalidMsg(t *testing.T) {
+	t.Parallel()
+
+	e := httpexpect.New(t, HTTPEndpoint)
+
+	e.DELETE("/subscripcion").WithQuery("doc", "asddsa").
+		Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.ErrQueryParamDocInvalidMsg)
+
+	e.DELETE("/subscripcion").WithQuery("doc", 123.4).
+		Expect().
+		Status(http.StatusBadRequest).
+		JSON().Object().
+		ContainsKey("message").ValueEqual("message", messages.ErrQueryParamDocInvalidMsg)
 }
