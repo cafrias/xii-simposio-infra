@@ -1,8 +1,15 @@
 package main_test
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
+
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
+
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -35,9 +42,6 @@ func tearDown(t *testing.T) {
 			},
 		})
 	}
-	// items := dynamodb.
-	// subsTable := []*dynamodb.WriteRequest{}
-	// subsTable[tableName] = &dynamodb.DeleteRe
 	input := &dynamodb.BatchWriteItemInput{
 		RequestItems: map[string][]*dynamodb.WriteRequest{
 			tableName: wReqs,
@@ -49,16 +53,43 @@ func tearDown(t *testing.T) {
 	}
 }
 
+func setUp(t *testing.T) *client.Client {
+	os.Setenv("TABLE_NAME", tableName)
+	c := client.NewClient()
+	err := c.Open()
+	if err != nil {
+		t.Fatal("Error while openning connection to DB, ", err)
+	}
+	return c
+}
+
+func ReadJSONFixture(path string, structure interface{}) error {
+	buf, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(buf, structure)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func TestPOST_ErrSubscripcionExistsMsg(t *testing.T) {
-	tearDown(t)
-	// e := httpexpect.New(t, HTTPEndpoint)
+	c := setUp(t)
+	defer tearDown(t)
+	var subs simposio.Subscripcion
 
-	// // e.POST("/subscripcion")
+	err := ReadJSONFixture("testdata/OK.json", &subs)
+	if err != nil {
+		t.Fatal("Error while reading fixture, ", err)
+	}
 
-	// e.POST("/subscripcion").
-	// 	Expect().
-	// 	Status(http.StatusCreated).
-	// 	JSON().Object().ContainsKey("message").ValueEqual("message", messages.ErrSubscripcionNotFoundMsg)
+	err = c.SubscripcionService().CreateSubscripcion(&subs)
+	if err != nil {
+		t.Fatal("Error while writing to DynamoDB, ", err)
+	}
 }
 
 // func TestGET(t *testing.T) {
