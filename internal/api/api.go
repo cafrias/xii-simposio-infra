@@ -24,3 +24,9 @@ func DefaultHeaders() Headers {
 		"Access-Control-Allow-Credentials": "true",
 	}
 }
+
+// Request represents a request object.
+type Request interface {
+	GetQuery(p string) string
+	GetBody() string
+}

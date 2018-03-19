@@ -11,6 +11,7 @@ import (
 
 	"github.com/friasdesign/xii-simposio-infra/cmd/subscripcion/messages"
 	"github.com/friasdesign/xii-simposio-infra/internal/api"
+	"github.com/friasdesign/xii-simposio-infra/internal/api/request"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/validators"
@@ -21,8 +22,8 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func handlePOST(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
-	b := req.Body
+func handlePOST(reqID string, req *request.Request) (int, api.Body, error) {
+	b := req.GetBody()
 
 	// Parse body
 	subs, err := parser.ParseSubscripcion(b)
@@ -61,8 +62,8 @@ func handlePOST(reqID string, req events.APIGatewayProxyRequest) (int, api.Body,
 	return 201, api.Body{LogID: reqID, Msg: messages.SucSavingSubscipcionMsg}, nil
 }
 
-func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
-	b := req.Body
+func handlePUT(reqID string, req *request.Request) (int, api.Body, error) {
+	b := req.GetBody()
 
 	// Parse body
 	subs, err := parser.ParseSubscripcion(b)
@@ -100,8 +101,8 @@ func handlePUT(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	return 201, api.Body{LogID: reqID, Msg: messages.SucSavingSubscipcionMsg}, nil
 }
 
-func handleGET(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
-	docStr := req.QueryStringParameters["doc"]
+func handleGET(reqID string, req *request.Request) (int, api.Body, error) {
+	docStr := req.GetQuery("doc")
 	doc, err := strconv.Atoi(docStr)
 	if err != nil {
 		fmt.Printf(messages.ErrQueryParamDocInvalidLog, docStr)
@@ -130,8 +131,8 @@ func handleGET(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, 
 	return 200, api.Body{LogID: reqID, Msg: messages.SucFetchingSubscripcionMsg, Payload: subs}, nil
 }
 
-func handleDELETE(reqID string, req events.APIGatewayProxyRequest) (int, api.Body, error) {
-	docStr := req.QueryStringParameters["doc"]
+func handleDELETE(reqID string, req *request.Request) (int, api.Body, error) {
+	docStr := req.GetQuery("doc")
 	doc, err := strconv.Atoi(docStr)
 	if err != nil {
 		fmt.Printf(messages.ErrQueryParamDocInvalidLog, docStr)
@@ -161,11 +162,12 @@ func handleDELETE(reqID string, req events.APIGatewayProxyRequest) (int, api.Bod
 }
 
 // Handler is used by AWS Lambda to handle request.
-func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func Handler(ctx context.Context, awsReq events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Get AWS request ID
 	lc, _ := lambdacontext.FromContext(ctx)
 	reqID := lc.AwsRequestID
-	HTTPMethod := req.HTTPMethod
+	HTTPMethod := awsReq.HTTPMethod
+	req := request.FromAPIGatewayProxyRequest(awsReq)
 	fmt.Printf("Starting request id '%s' with HTTP method '%s'\n", reqID, HTTPMethod)
 
 	var st int
