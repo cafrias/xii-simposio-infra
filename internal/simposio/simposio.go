@@ -32,7 +32,7 @@ type Subscripcion struct {
 	PonenciaArea        string  `json:"ponencia_area,omitempty"`
 	PonenciaCoautores   string  `json:"ponencia_coautores,omitempty"`
 	PonenciaInstitucion string  `json:"ponencia_institucion,omitempty"`
-	Acompanantes        int     `json:"acompanantes" validate:"required,gte=0"`
+	Acompanantes        int     `json:"acompanantes" validate:"gte=0"`
 	Confirmado          bool    `json:"confirmado"`
 }
 
