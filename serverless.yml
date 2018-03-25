@@ -7,7 +7,7 @@ plugins:
 
 provider:
   name: aws
-  stage: ${opt:stage, 'dev'}
+  stage: ${opt:stage, 'prod'}
   runtime: go1.x
   region: sa-east-1
   cfLogs: true
@@ -38,16 +38,17 @@ provider:
 # Define custom variables
 custom:
   EDICION: 'xii'
+  DOMAIN: simposioenushuaia.com.ar
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   EMAIL: carlos.a.frias@gmail.com
   USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
   SUBS_URI: subscripcion
-  CORS_ORIGINS: "'*'"
+  CORS_ORIGINS: "'https://www.${self:custom.DOMAIN}'"
   CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
   CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
   customDomain:
-    domainName: simposio.cfrias.com.ar
-    basePath: api
+    domainName: api.${self:custom.DOMAIN}
+    basePath: /
     stage: ${self:provider.stage}
     createRoute53Record: true
     endpointType: 'regional'
