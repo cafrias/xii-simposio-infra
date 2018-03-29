@@ -7,9 +7,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/messages"
+
 	"github.com/aws/aws-lambda-go/lambdacontext"
 
-	"github.com/friasdesign/xii-simposio-infra/cmd/subscripcion/messages"
 	"github.com/friasdesign/xii-simposio-infra/internal/api"
 	"github.com/friasdesign/xii-simposio-infra/internal/api/request"
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"

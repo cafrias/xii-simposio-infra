@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/friasdesign/xii-simposio-infra/internal/simposio/messages"
+
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio"
 
 	"github.com/friasdesign/xii-simposio-infra/internal/simposio/client"
@@ -16,7 +18,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/friasdesign/xii-simposio-infra/cmd/subscripcion/messages"
 	"gopkg.in/gavv/httpexpect.v1"
 )
 
