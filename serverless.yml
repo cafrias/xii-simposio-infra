@@ -84,6 +84,8 @@ functions:
   list:
     handler: bin/list
     timeout: 30
+    environment:
+      TABLE_NAME: ${self:custom.TABLE_NAME}
     events:
       - http:
           path: /${self:custom.SUBS_URI}/list

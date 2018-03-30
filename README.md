@@ -9,6 +9,11 @@ This project is done using [Serverless framework](https://serverless.com/).
 
 Run this command: `AWS_DEFAULT_REGION="us-east-1" aws cloudformation create-stack --stack-name xii-simposio --template-body file://cognito-template.yml`
 
+## Run locally
+
+Keep sam template file up to date: `serverless sam export --output ./template.yml`
+Run: `sam local start-api`
+
 ## License
 
 All code is under MIT license, [read license](LICENSE). Distribution of logos, pictures, and other propietary imagery is forbidden unless under explicit authorization, you could contact [ponencias.simposio@gmail.com](mailto:ponencias.simposio@gmail.com).

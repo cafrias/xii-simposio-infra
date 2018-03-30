@@ -67,7 +67,9 @@ func Handler(ctx context.Context, awsReq events.APIGatewayProxyRequest) (events.
 	var err error
 	switch query {
 	case "pending":
+		fallthrough
 	case "confirmed":
+		fallthrough
 	case "all":
 		st, b, err = handleListing(reqID, query)
 	default:
