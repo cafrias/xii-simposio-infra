@@ -38,12 +38,20 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		}
 
 		// Add Total
+		fmt.Println("Adding total")
 		base := simposio.Aranceles[record.Change.NewImage["arancel_categoria"].String()]
-		adicional, _ := record.Change.NewImage["arancel_adicional"].Float()
+		var adicional float64
+		adVal := record.Change.NewImage["arancel_adicional"]
+		if adVal.IsNull() {
+			adicional = 0
+		} else {
+			adicional, _ = record.Change.NewImage["arancel_adicional"].Float()
+		}
 		smap["Arancel Base"] = strconv.FormatFloat(base, 'f', -1, 64)
 		smap["Total"] = strconv.FormatFloat(base+adicional, 'f', -1, 64)
 
 		// Parse Template
+		fmt.Println("Parsing template")
 		tStr, err := templates.ParseNewSubscripcion(smap)
 		if err != nil {
 			fmt.Println("Error while parsing template")
