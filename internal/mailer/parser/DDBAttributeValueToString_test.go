@@ -53,6 +53,13 @@ func TestDDBAttributeValueToString_ConvertsCorrectly(t *testing.T) {
 			Error:     nil,
 		},
 		testCase{
+			Key:       "otro",
+			AttrType:  "B",
+			AttrValue: "\"\"",
+			Output:    "",
+			Error:     nil,
+		},
+		testCase{
 			Key:       "integer",
 			AttrType:  "N",
 			AttrValue: "\"22\"",

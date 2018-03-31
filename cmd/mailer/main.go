@@ -24,6 +24,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		smap := make(map[string]string)
 
 		for key, value := range record.Change.NewImage {
+			fmt.Printf("Processing key '%s' with type '%v'\n", key, value.DataType())
 			// Parse DynamoDBAttribute to string
 			valStr, err := parser.DDBAttributeValueToString(key, value)
 			if err != nil {

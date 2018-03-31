@@ -10,6 +10,8 @@ import (
 // DDBAttributeValueToString converts a DynamoDBAttributeValue into string.
 func DDBAttributeValueToString(key string, attr events.DynamoDBAttributeValue) (string, error) {
 	switch attr.DataType() {
+	case events.DataTypeBinary:
+		return string(attr.Binary()), nil
 	case events.DataTypeNull:
 		return "", nil
 	case events.DataTypeBoolean:
