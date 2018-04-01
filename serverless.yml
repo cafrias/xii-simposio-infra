@@ -94,6 +94,20 @@ functions:
           authorizer:
             arn: ${self:custom.USER_POOL_ARN}
   
+  confirm:
+    handler: bin/confirm
+    timeout: 30
+    environment:
+      TABLE_NAME: ${self:custom.TABLE_NAME}
+      ALLOWED_ORIGINS: '*'
+    events:
+      - http:
+          path: /${self:custom.SUBS_URI}/confirmar
+          method: put
+          cors: true
+          authorizer:
+            arn: ${self:custom.USER_POOL_ARN}
+  
   subscripcionCRUD:
     handler: bin/subscripcion
     timeout: 30
