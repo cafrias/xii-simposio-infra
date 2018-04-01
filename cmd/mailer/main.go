@@ -15,20 +15,34 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+// General Errors
+const (
+	ErrParsingAttrToStringLog = "Error while parsing DDBAttributeValue to String"
+)
+
 // Handler handles the request for new Subscripcion events on DymanoDB.
 func Handler(ctx context.Context, e events.DynamoDBEvent) {
 	for _, record := range e.Records {
 		fmt.Printf("Processing EventID: %v\n", record.EventID)
+		fmt.Printf("Record object: %v\n", record)
 
 		// Convert to string map
 		smap := make(map[string]string)
+
+		newImgElems := len(record.Change.NewImage)
+		fmt.Printf("Number of new image elements: %v\n", newImgElems)
+		if newImgElems == 0 {
+			fmt.Println("No elements in NewImage event!")
+			return
+		}
 
 		for key, value := range record.Change.NewImage {
 			fmt.Printf("Processing key '%s' with type '%v'\n", key, value.DataType())
 			// Parse DynamoDBAttribute to string
 			valStr, err := parser.DDBAttributeValueToString(key, value)
 			if err != nil {
-				fmt.Print("Error while parsing DDBAttributeValue to String", err)
+				fmt.Print(ErrParsingAttrToStringLog, err)
+				return
 			}
 
 			// Humanize label
@@ -39,7 +53,13 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 
 		// Add Total
 		fmt.Println("Adding total")
-		base := simposio.Aranceles[record.Change.NewImage["arancel_categoria"].String()]
+		aranCat, err := parser.DDBAttributeValueToString("arancel_categoria", record.Change.NewImage["arancel_categoria"])
+		if err != nil {
+			fmt.Println(ErrParsingAttrToStringLog, err)
+			return
+		}
+		base := simposio.Aranceles[aranCat]
+
 		var adicional float64
 		adVal := record.Change.NewImage["arancel_adicional"]
 		if adVal.IsNull() {
@@ -47,6 +67,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		} else {
 			adicional, _ = record.Change.NewImage["arancel_adicional"].Float()
 		}
+
 		smap["Arancel Base"] = strconv.FormatFloat(base, 'f', -1, 64)
 		smap["Total"] = strconv.FormatFloat(base+adicional, 'f', -1, 64)
 
