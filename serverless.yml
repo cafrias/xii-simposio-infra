@@ -51,7 +51,7 @@ custom:
   prod:
     EMAIL: ponencias.simposio@gmail.com
     USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
-    CORS_ORIGINS: "'*'"
+    CORS_ORIGINS: "'https://www.${self:custom.DOMAIN}'"
     CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
     DOMAIN: api.simposioenushuaia.com.ar
