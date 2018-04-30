@@ -2,6 +2,7 @@ package mailClient
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -12,9 +13,9 @@ import (
 // New creates a new instace of MailClient
 func New() (*MailClient, error) {
 	mail := MailClient{
-		Sender: aws.String("carlos.a.frias@gmail.com"),
+		Sender: aws.String(os.Getenv("EMAIL")),
 		Receivers: []*string{
-			aws.String("carlos.a.frias@gmail.com"),
+			aws.String(os.Getenv("EMAIL")),
 		},
 		Charset: aws.String("UTF-8"),
 		Subject: aws.String("Nueva Subscripcion XII Simposio"),

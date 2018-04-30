@@ -39,15 +39,26 @@ provider:
 custom:
   EDICION: 'xii'
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
-  EMAIL: carlos.a.frias@gmail.com
-  USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
   SUBS_URI: subscripcion
-  CORS_ORIGINS: "'*'"
-  CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-  CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
+  dev:
+    EMAIL: carlos.a.frias@gmail.com
+    USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
+    CORS_ORIGINS: "'*'"
+    CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
+    DOMAIN: simposio.cfrias.com.ar
+    DOMAIN_BASE_PATH: api
+  prod:
+    EMAIL: ponencias.simposio@gmail.com
+    USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
+    CORS_ORIGINS: "'*'"
+    CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
+    DOMAIN: api.simposioenushuaia.com.ar
+    DOMAIN_BASE_PATH: ''
   customDomain:
-    domainName: simposio.cfrias.com.ar
-    basePath: api
+    domainName: ${self:custom.${opt:stage}.DOMAIN}
+    basePath: ${self:custom.${opt:stage}.DOMAIN_BASE_PATH}
     stage: ${self:provider.stage}
     createRoute53Record: true
     endpointType: 'regional'
@@ -56,8 +67,6 @@ custom:
       inMemory: true
       migrate: false
       seed: false
-  # validatorRoleName: simposio-roles-validator
-  # mailerRoleName: simposio-roles-mailer
 
 package:
  exclude:
@@ -92,7 +101,7 @@ functions:
           method: get
           cors: true
           authorizer:
-            arn: ${self:custom.USER_POOL_ARN}
+            arn: ${self:custom.${opt:stage}.USER_POOL_ARN}
   
   confirm:
     handler: bin/confirm
@@ -106,7 +115,7 @@ functions:
           method: put
           cors: true
           authorizer:
-            arn: ${self:custom.USER_POOL_ARN}
+            arn: ${self:custom.${opt:stage}.USER_POOL_ARN}
   
   subscripcionCRUD:
     handler: bin/subscripcion
@@ -124,19 +133,19 @@ functions:
           method: get
           cors: true
           authorizer:
-            arn: ${self:custom.USER_POOL_ARN}
+            arn: ${self:custom.${opt:stage}.USER_POOL_ARN}
       - http:
           path: ${self:custom.SUBS_URI}
           method: put
           cors: true
           authorizer:
-            arn: ${self:custom.USER_POOL_ARN}
+            arn: ${self:custom.${opt:stage}.USER_POOL_ARN}
       - http:
           path: ${self:custom.SUBS_URI}
           method: delete
           cors: true
           authorizer:
-            arn: ${self:custom.USER_POOL_ARN}
+            arn: ${self:custom.${opt:stage}.USER_POOL_ARN}
 
 
 # you can add CloudFormation resource templates here
@@ -161,9 +170,9 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.CORS_ORIGINS}
-          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.CORS_HEADERS}
-          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.CORS_METHODS}
+          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.${opt:stage}.CORS_ORIGINS}
+          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.${opt:stage}.CORS_HEADERS}
+          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.${opt:stage}.CORS_METHODS}
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
@@ -171,9 +180,9 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.CORS_ORIGINS}
-          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.CORS_HEADERS}
-          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.CORS_METHODS}
+          gatewayresponse.header.Access-Control-Allow-Origin: ${self:custom.${opt:stage}.CORS_ORIGINS}
+          gatewayresponse.header.Access-Control-Allow-Headers: ${self:custom.${opt:stage}.CORS_HEADERS}
+          gatewayresponse.header.Access-Control-Allow-Methods: ${self:custom.${opt:stage}.CORS_METHODS}
         ResponseType: DEFAULT_5XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'

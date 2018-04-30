@@ -75,7 +75,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		fmt.Println("Parsing template")
 		tStr, err := templates.ParseNewSubscripcion(smap)
 		if err != nil {
-			fmt.Println("Error while parsing template")
+			fmt.Println("Error while parsing template", err)
 			return
 		}
 
@@ -89,7 +89,7 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		// Send email
 		err = mailCli.Send(tStr)
 		if err != nil {
-			fmt.Println("Error while sending email.")
+			fmt.Println("Error while sending email.", err)
 			return
 		}
 
