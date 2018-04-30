@@ -42,23 +42,24 @@ custom:
   SUBS_URI: subscripcion
   dev:
     EMAIL: carlos.a.frias@gmail.com
+    API_DOMAIN: simposio.cfrias.com.ar
+    API_DOMAIN_BASE_PATH: api
     USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
     CORS_ORIGINS: "'*'"
     CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
-    DOMAIN: simposio.cfrias.com.ar
-    DOMAIN_BASE_PATH: api
   prod:
     EMAIL: ponencias.simposio@gmail.com
+    WEB_DOMAIN: www.simposioenushuaia.com.ar
+    API_DOMAIN: api.simposioenushuaia.com.ar
+    API_DOMAIN_BASE_PATH: ''
     USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
-    CORS_ORIGINS: "'https://www.${self:custom.DOMAIN}'"
+    CORS_ORIGINS: "'https://${self:custom.prod.WEB_DOMAIN}'"
     CORS_HEADERS: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
     CORS_METHODS: "'GET,POST,OPTIONS,DELETE,PUT'"
-    DOMAIN: api.simposioenushuaia.com.ar
-    DOMAIN_BASE_PATH: ''
   customDomain:
-    domainName: ${self:custom.${self:provider.stage}.DOMAIN}
-    basePath: ${self:custom.${self:provider.stage}.DOMAIN_BASE_PATH}
+    domainName: ${self:custom.${self:provider.stage}.API_DOMAIN}
+    basePath: ${self:custom.${self:provider.stage}.API_DOMAIN_BASE_PATH}
     stage: ${self:provider.stage}
     createRoute53Record: true
     endpointType: 'regional'
@@ -79,7 +80,7 @@ functions:
     handler: bin/mailer
     timeout: 60
     environment:
-      EMAIL: ${self:custom.EMAIL}
+      EMAIL: ${self:custom.${self:provider.stage}.EMAIL}
     events:
       - stream:
           type: dynamodb

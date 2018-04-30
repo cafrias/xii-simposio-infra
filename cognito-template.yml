@@ -17,6 +17,14 @@ Resources:
       ReadAttributes:
         - email
       UserPoolId: !Ref AdminUserPool
+  SimposioIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: simposio
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref SimposioPoolClient
+          ProviderName: !GetAtt AdminUserPool.ProviderName
 Outputs:
   AdminUserPoolID:
     Description: 'CognitoUserPoolID of AdminUserPool.'
@@ -24,3 +32,6 @@ Outputs:
   SimposioPoolClientID:
     Description: 'ClientID of SimposioPoolClient'
     Value: !Ref SimposioPoolClient
+  SimposioPoolClientID:
+    Description: 'ID of Identity Pool'
+    Value: !Ref SimposioIdentityPool
