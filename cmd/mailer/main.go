@@ -18,6 +18,7 @@ import (
 // General Errors
 const (
 	ErrParsingAttrToStringLog = "Error while parsing DDBAttributeValue to String"
+	ErrConfirmadoLog          = "Subscripcion is confirmed, skipping email"
 )
 
 // Handler handles the request for new Subscripcion events on DymanoDB.
@@ -29,14 +30,22 @@ func Handler(ctx context.Context, e events.DynamoDBEvent) {
 		// Convert to string map
 		smap := make(map[string]string)
 
-		newImgElems := len(record.Change.NewImage)
+		nImg := record.Change.NewImage
+
+		newImgElems := len(nImg)
 		fmt.Printf("Number of new image elements: %v\n", newImgElems)
 		if newImgElems == 0 {
 			fmt.Println("No elements in NewImage event!")
 			return
 		}
 
-		for key, value := range record.Change.NewImage {
+		// If confirmado don't send email
+		if nImg["confirmado"].Boolean() == true {
+			fmt.Println(ErrConfirmadoLog)
+			break
+		}
+
+		for key, value := range nImg {
 			fmt.Printf("Processing key '%s' with type '%v'\n", key, value.DataType())
 			// Parse DynamoDBAttribute to string
 			valStr, err := parser.DDBAttributeValueToString(key, value)
