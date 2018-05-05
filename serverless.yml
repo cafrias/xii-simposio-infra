@@ -40,23 +40,24 @@ custom:
   EDICION: 'xii'
   TABLE_NAME: ${self:custom.EDICION}-simposio-${self:provider.stage}-subscripciones
   SUBS_URI: subscripcion
+  CORS_HEADERS:
+    - Content-Type
+    - X-Amz-Date
+    - Authorization
+    - X-Api-Key
+    - X-Amz-Security-Token
+    - X-Amz-User-Agent
   dev:
     EMAIL: carlos.a.frias@gmail.com
     API_DOMAIN: simposio.cfrias.com.ar
     API_DOMAIN_BASE_PATH: api
     USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_nUWIGLPIV
-    CORS_ORIGINS: '*'
-    CORS_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
-    CORS_METHODS: 'GET,POST,OPTIONS,DELETE,PUT'
   prod:
     EMAIL: ponencias.simposio@gmail.com
     WEB_DOMAIN: www.simposioenushuaia.com.ar
     API_DOMAIN: api.simposioenushuaia.com.ar
     API_DOMAIN_BASE_PATH: ''
     USER_POOL_ARN: arn:aws:cognito-idp:us-east-1:188324601563:userpool/us-east-1_VQPMOouId
-    CORS_ORIGINS: https://${self:custom.prod.WEB_DOMAIN}
-    CORS_HEADERS: 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'
-    CORS_METHODS: 'GET,POST,OPTIONS,DELETE,PUT'
   customDomain:
     domainName: ${self:custom.${self:provider.stage}.API_DOMAIN}
     basePath: ${self:custom.${self:provider.stage}.API_DOMAIN_BASE_PATH}
@@ -96,7 +97,7 @@ functions:
     timeout: 30
     environment:
       TABLE_NAME: ${self:custom.TABLE_NAME}
-      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.CORS_ORIGINS}
+      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.API_DOMAIN}
     events:
       - http:
           path: /${self:custom.SUBS_URI}/list
@@ -110,7 +111,7 @@ functions:
     timeout: 30
     environment:
       TABLE_NAME: ${self:custom.TABLE_NAME}
-      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.CORS_ORIGINS}
+      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.API_DOMAIN}
     events:
       - http:
           path: ${self:custom.SUBS_URI}
@@ -158,9 +159,9 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'${self:custom.${self:provider.stage}.CORS_ORIGINS}'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'${self:custom.${self:provider.stage}.CORS_HEADERS}'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'${self:custom.${self:provider.stage}.CORS_METHODS}'"
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE,PUT'"
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
@@ -168,9 +169,9 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          gatewayresponse.header.Access-Control-Allow-Origin: "'${self:custom.${self:provider.stage}.CORS_ORIGINS}'"
-          gatewayresponse.header.Access-Control-Allow-Headers: "'${self:custom.${self:provider.stage}.CORS_HEADERS}'"
-          gatewayresponse.header.Access-Control-Allow-Methods: "'${self:custom.${self:provider.stage}.CORS_METHODS}'"
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE,PUT'"
         ResponseType: DEFAULT_5XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
