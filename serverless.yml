@@ -97,7 +97,7 @@ functions:
     timeout: 30
     environment:
       TABLE_NAME: ${self:custom.TABLE_NAME}
-      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.API_DOMAIN}
+      ALLOWED_ORIGINS: '*'
     events:
       - http:
           path: /${self:custom.SUBS_URI}/list
@@ -111,7 +111,7 @@ functions:
     timeout: 30
     environment:
       TABLE_NAME: ${self:custom.TABLE_NAME}
-      ALLOWED_ORIGINS: ${self:custom.${self:provider.stage}.API_DOMAIN}
+      ALLOWED_ORIGINS: '*'
     events:
       - http:
           path: ${self:custom.SUBS_URI}
